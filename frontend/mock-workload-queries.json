@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Top earners with commission",
+    "oracle_sql": "SELECT e.first_name, e.last_name, e.salary, NVL(e.commission_pct, 0) AS commission FROM employees e WHERE ROWNUM <= 5 ORDER BY e.salary DESC",
+    "pg_sql": "SELECT e.first_name, e.last_name, e.salary, COALESCE(e.commission_pct, 0) AS commission FROM employees e ORDER BY e.salary DESC LIMIT 5",
+    "quirks": ["NVL", "ROWNUM"]
+  },
+  {
+    "name": "Department headcount",
+    "oracle_sql": "SELECT d.department_name, COUNT(*) AS headcount FROM departments d, employees e WHERE d.department_id = e.department_id GROUP BY d.department_name",
+    "pg_sql": "SELECT d.department_name, COUNT(*) AS headcount FROM departments d JOIN employees e ON d.department_id = e.department_id GROUP BY d.department_name",
+    "quirks": ["implicit_join"]
+  },
+  {
+    "name": "Salary with DECODE",
+    "oracle_sql": "SELECT first_name, DECODE(department_id, 10, 'Engineering', 20, 'Marketing', 'Other') AS dept FROM employees",
+    "pg_sql": "SELECT first_name, CASE department_id WHEN 10 THEN 'Engineering' WHEN 20 THEN 'Marketing' ELSE 'Other' END AS dept FROM employees",
+    "quirks": ["DECODE"]
+  },
+  {
+    "name": "Current date from DUAL",
+    "oracle_sql": "SELECT SYSDATE FROM DUAL",
+    "pg_sql": "SELECT CURRENT_TIMESTAMP",
+    "quirks": ["SYSDATE", "DUAL"]
+  },
+  {
+    "name": "Date formatting",
+    "oracle_sql": "SELECT first_name, TO_CHAR(hire_date, 'YYYY-MM-DD') AS hired FROM employees WHERE hire_date > TO_DATE('2020-01-01', 'YYYY-MM-DD')",
+    "pg_sql": "SELECT first_name, TO_CHAR(hire_date::timestamp, 'YYYY-MM-DD') AS hired FROM employees WHERE hire_date > '2020-01-01'::date",
+    "quirks": ["TO_CHAR", "TO_DATE"]
+  },
+  {
+    "name": "Oracle outer join syntax",
+    "oracle_sql": "SELECT e.first_name, d.department_name FROM employees e, departments d WHERE e.department_id = d.department_id(+)",
+    "pg_sql": "SELECT e.first_name, d.department_name FROM employees e LEFT JOIN departments d ON e.department_id = d.department_id",
+    "quirks": ["(+) outer join"]
+  },
+  {
+    "name": "SUBSTR 1-indexed",
+    "oracle_sql": "SELECT SUBSTR(email, 1, 5) AS prefix FROM employees",
+    "pg_sql": "SELECT SUBSTRING(email FROM 1 FOR 5) AS prefix FROM employees",
+    "quirks": ["SUBSTR"]
+  },
+  {
+    "name": "String concatenation",
+    "oracle_sql": "SELECT first_name || ' ' || last_name AS full_name FROM employees",
+    "pg_sql": "SELECT first_name || ' ' || last_name AS full_name FROM employees",
+    "quirks": ["|| concat (compatible)"]
+  },
+  {
+    "name": "TRUNC date",
+    "oracle_sql": "SELECT TRUNC(SYSDATE) FROM DUAL",
+    "pg_sql": "SELECT DATE_TRUNC('day', CURRENT_TIMESTAMP)",
+    "quirks": ["TRUNC", "SYSDATE", "DUAL"]
+  },
+  {
+    "name": "NVL2 with salary bonus",
+    "oracle_sql": "SELECT first_name, NVL(commission_pct, 0) * salary AS bonus FROM employees WHERE salary > 80000",
+    "pg_sql": "SELECT first_name, COALESCE(commission_pct, 0) * salary AS bonus FROM employees WHERE salary > 80000",
+    "quirks": ["NVL"]
+  },
+  {
+    "name": "Total orders per employee",
+    "oracle_sql": "SELECT e.first_name, e.last_name, NVL(SUM(o.amount), 0) AS total_sales FROM employees e, orders o WHERE e.employee_id = o.employee_id(+) GROUP BY e.first_name, e.last_name",
+    "pg_sql": "SELECT e.first_name, e.last_name, COALESCE(SUM(o.amount), 0) AS total_sales FROM employees e LEFT JOIN orders o ON e.employee_id = o.employee_id GROUP BY e.first_name, e.last_name",
+    "quirks": ["NVL", "(+) outer join"]
+  },
+  {
+    "name": "ROWNUM pagination",
+    "oracle_sql": "SELECT * FROM (SELECT e.*, ROWNUM rn FROM employees e WHERE ROWNUM <= 10) WHERE rn > 5",
+    "pg_sql": "SELECT * FROM employees LIMIT 5 OFFSET 5",
+    "quirks": ["ROWNUM"]
+  },
+  {
+    "name": "Hint removal",
+    "oracle_sql": "SELECT /*+ INDEX(e emp_salary_idx) */ first_name, salary FROM employees e WHERE salary > 90000",
+    "pg_sql": "SELECT first_name, salary FROM employees e WHERE salary > 90000",
+    "quirks": ["named hints"]
+  },
+  {
+    "name": "MERGE statement",
+    "oracle_sql": "MERGE INTO employees e USING (SELECT 99 AS id, 'New' AS fname FROM DUAL) s ON (e.employee_id = s.id) WHEN MATCHED THEN UPDATE SET first_name = s.fname WHEN NOT MATCHED THEN INSERT (employee_id, first_name) VALUES (s.id, s.fname)",
+    "pg_sql": "INSERT INTO employees (employee_id, first_name) VALUES (99, 'New') ON CONFLICT (employee_id) DO UPDATE SET first_name = EXCLUDED.first_name",
+    "quirks": ["MERGE", "DUAL"]
+  },
+  {
+    "name": "Sequence nextval",
+    "oracle_sql": "SELECT emp_seq.NEXTVAL FROM DUAL",
+    "pg_sql": "SELECT nextval('emp_seq')",
+    "quirks": [".NEXTVAL", "DUAL"]
+  },
+  {
+    "name": "Slow query — full table scan (for demo regression)",
+    "oracle_sql": "SELECT e.first_name, e.last_name, d.department_name, NVL(e.commission_pct, 0) * e.salary AS bonus FROM employees e, departments d WHERE e.department_id = d.department_id AND e.salary > 50000 ORDER BY bonus DESC",
+    "pg_sql": "SELECT e.first_name, e.last_name, d.department_name, COALESCE(e.commission_pct, 0) * e.salary AS bonus FROM employees e CROSS JOIN departments d WHERE e.department_id = d.department_id AND e.salary > 50000 ORDER BY bonus DESC",
+    "quirks": ["NVL", "implicit_join", "intentional_regression"]
+  }
+]

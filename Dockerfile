@@ -12,6 +12,9 @@ ENV PYTHONPATH="/app/optimizer_engine:${PYTHONPATH}"
 # Copy backend code
 COPY backend/ /app/
 
+# Copy frontend build as static files
+COPY frontend/dist/ /app/static/
+
 # Copy mock workload data
 COPY mock-workload/ /app/mock-workload/
 

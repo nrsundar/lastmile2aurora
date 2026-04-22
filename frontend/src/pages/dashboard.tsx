@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [, navigate] = useLocation();
   const { events, connected } = useWebSocket();
   const [simulating, setSimulating] = useState(false);
+  const [simResults, setSimResults] = useState<any[]>([]);
 
   if (!user) {
     navigate("/auth");
@@ -27,18 +28,19 @@ export default function DashboardPage() {
   const runDemo = async () => {
     setSimulating(true);
     try {
-      const resp = await fetch("/mock-workload/demo_queries.json");
-      const queries = await resp.json();
-      await api.simulate(queries.map((q: any) => ({ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql })));
+      const queries = (await import("../../mock-workload-queries.json")).default;
+      const resp = await api.simulate(queries.map((q: any) => ({ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql })));
+      setSimResults(resp.results || []);
     } catch (e) {
       console.error(e);
     }
     setSimulating(false);
   };
 
-  const regressions = events.filter((e) => e.regression);
-  const passed = events.filter((e) => e.passed && !e.regression);
-  const failed = events.filter((e) => !e.passed);
+  const allEvents = simResults.length > 0 ? simResults : events;
+  const regressions = allEvents.filter((e: any) => e.regression || e.diff_summary?.performance?.regression);
+  const passed = allEvents.filter((e: any) => e.passed);
+  const failed = allEvents.filter((e: any) => !e.passed && !e.regression);
 
   return (
     <ContentLayout
@@ -87,7 +89,7 @@ export default function DashboardPage() {
                 ),
             },
           ]}
-          items={events.slice(0, 50)}
+          items={allEvents.slice(0, 50)}
           empty={<Box textAlign="center">No queries observed yet. Click "Run Demo Workload" to start.</Box>}
         />
       </SpaceBetween>

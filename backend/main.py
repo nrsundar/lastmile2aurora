@@ -7,9 +7,12 @@ detects performance regressions, and auto-remediates via LLM rewriting.
 import time
 import json
 import hashlib
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 
@@ -351,3 +354,20 @@ def _store_remediation(qh, original_sql, rewrite):
             get_pool().putconn(conn)
     except Exception as e:
         print(f"Remediation storage failed: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# Serve frontend static files (SPA fallback)
+# ═══════════════════════════════════════════════════════════════════
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(_STATIC_DIR):
+    app.mount("/assets", StaticFiles(directory=os.path.join(_STATIC_DIR, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve the SPA index.html for all non-API routes."""
+        file_path = os.path.join(_STATIC_DIR, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(_STATIC_DIR, "index.html"))
