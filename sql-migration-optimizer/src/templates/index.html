@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Migration Optimizer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark">
+                <h3 class="card-title mb-0">SQL Code Analysis</h3>
+            </div>
+            <div class="card-body">
+                <form id="sql-form">
+                    <div class="mb-3">
+                        <label for="source-type" class="form-label">Source Database Type</label>
+                        <select class="form-select" id="source-type" name="source_type">
+                            <option value="oracle" selected>Oracle PL/SQL</option>
+                            <option value="sqlserver">SQL Server T-SQL</option>
+                            <option value="postgresql">PostgreSQL (Optimization Only)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label for="sql-input" class="form-label">SQL Code</label>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="float-end">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="aurora-specific" name="aurora-specific" checked>
+                                        <label class="form-check-label" for="aurora-specific">Aurora Optimizations</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="sql-input" class="form-control" rows="10" placeholder="Enter your SQL code here..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="target-version" class="form-label">Target PostgreSQL Version</label>
+                        <select class="form-select" id="target-version" name="target_version">
+                            <option value="16" selected>PostgreSQL 16 (Aurora Compatible)</option>
+                            <option value="15">PostgreSQL 15 (Aurora Compatible)</option>
+                            <option value="14">PostgreSQL 14 (Aurora Compatible)</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="clear-button">
+                            <i class="fas fa-eraser me-1"></i>Clear
+                        </button>
+                        <div>
+                            <button type="button" class="btn btn-primary" id="analyze-button">
+                                <i class="fas fa-search me-1"></i>Analyze
+                            </button>
+                            <div class="spinner-border text-primary d-none" id="loading-spinner" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Results -->
+<div id="results-container" class="d-none">
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="issues-tab" data-bs-toggle="tab" data-bs-target="#issues" type="button" role="tab" aria-controls="issues" aria-selected="true">
+                        Analysis <span id="issues-badge" class="badge rounded-pill bg-danger ms-1">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab" aria-controls="comparison" aria-selected="false">
+                        Comparison
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance" type="button" role="tab" aria-controls="performance" aria-selected="false">
+                        Performance Metrics
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="optimized-tab" data-bs-toggle="tab" data-bs-target="#optimized" type="button" role="tab" aria-controls="optimized" aria-selected="false">
+                        Optimized SQL
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content" id="resultTabsContent">
+                <!-- Issues Tab -->
+                <div class="tab-pane fade show active" id="issues" role="tabpanel" aria-labelledby="issues-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="analysis-results" class="mb-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>No analysis performed yet. Click "Analyze" to begin.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Performance Metrics Tab -->
+                <div class="tab-pane fade" id="performance" role="tabpanel" aria-labelledby="performance-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="performance-metrics" class="mb-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>Performance metrics will appear here after analysis.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comparison Tab -->
+                <div class="tab-pane fade" id="comparison" role="tabpanel" aria-labelledby="comparison-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Original SQL</h5>
+                                    <div id="original-sql-display" class="code-display"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Optimized SQL</h5>
+                                    <div id="optimized-sql-display" class="code-display"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Optimized SQL Tab -->
+                <div class="tab-pane fade" id="optimized" role="tabpanel" aria-labelledby="optimized-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="optimized-sql-container">
+                                <textarea id="optimized-sql" class="form-control" rows="10" readonly></textarea>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-primary" id="copy-optimized">
+                                    <i class="fas fa-copy me-1"></i>Copy to Clipboard
+                                </button>
+                                <button class="btn btn-sm btn-secondary" id="use-optimized">
+                                    <i class="fas fa-redo me-1"></i>Use as Input
+                                </button>
+                                <button class="btn btn-sm btn-success" id="download-optimized">
+                                    <i class="fas fa-download me-1"></i>Download SQL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Queries Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Recent Queries</h4>
+                <button class="btn btn-sm btn-outline-secondary" id="refresh-recent">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="recent-queries-container">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the editor and load recent queries
+        initSqlEditor();
+        loadRecentQueries();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,419 @@
+/* Gamification Progress Tracker Styles */
+
+.gamification-panel {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: calc(100vh - 120px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 999;
+    transition: all 0.3s ease;
+    border: 1px solid var(--bs-border-color);
+    overflow: hidden;
+}
+
+.gamification-panel.collapsed {
+    width: 120px;
+    height: 60px;
+}
+
+.gamification-panel.collapsed .gamification-content {
+    display: none;
+}
+
+.gamification-header {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+    padding: 0;
+}
+
+.gamification-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.gamification-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.level-indicator {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.gamification-content {
+    padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.progress-overview {
+    margin-bottom: 25px;
+}
+
+.user-level h4 {
+    color: var(--bs-primary);
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.experience-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bs-light);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.experience-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 12px;
+    background: var(--bs-light);
+    border-radius: 8px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.skills-section,
+.achievements-section,
+.daily-challenge {
+    margin-bottom: 25px;
+}
+
+.skills-section h5,
+.achievements-section h5,
+.daily-challenge h5 {
+    color: var(--bs-dark);
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.skills-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skill-item {
+    background: white;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.skill-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.skill-level {
+    background: var(--bs-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.skill-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--bs-light);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.skill-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.skill-points {
+    color: var(--bs-secondary);
+    font-size: 11px;
+}
+
+.achievements-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--bs-border-color);
+    transition: all 0.2s;
+}
+
+.achievement-item.unlocked {
+    background: linear-gradient(135deg, var(--bs-success), var(--bs-info));
+    color: white;
+    border-color: var(--bs-success);
+    animation: achievement-glow 2s ease-in-out;
+}
+
+.achievement-item.locked {
+    background: var(--bs-light);
+    opacity: 0.6;
+}
+
+.achievement-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.achievement-description {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+.achievement-points {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+@keyframes achievement-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(var(--bs-success-rgb), 0); }
+    50% { box-shadow: 0 0 20px rgba(var(--bs-success-rgb), 0.3); }
+}
+
+.challenge-card {
+    background: linear-gradient(135deg, var(--bs-warning), var(--bs-info));
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.challenge-task {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.challenge-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.challenge-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.challenge-progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.challenge-progress-text {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.challenge-reward {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* Notification Styles */
+.points-notification,
+.level-up-notification,
+.achievement-notification {
+    position: fixed;
+    top: 100px;
+    right: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 15px 20px;
+    z-index: 1002;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    border-left: 4px solid var(--bs-success);
+}
+
+.points-notification.show,
+.level-up-notification.show,
+.achievement-notification.show {
+    transform: translateX(0);
+}
+
+.level-up-notification {
+    border-left-color: var(--bs-warning);
+    text-align: center;
+}
+
+.achievement-notification {
+    border-left-color: var(--bs-info);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.points-message,
+.level-up-message {
+    font-weight: 600;
+    color: var(--bs-dark);
+    margin-bottom: 5px;
+}
+
+.points-earned,
+.level-up-level {
+    color: var(--bs-success);
+    font-weight: bold;
+}
+
+.level-up-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.achievement-notification-icon {
+    font-size: 32px;
+}
+
+.achievement-notification-title {
+    font-weight: 600;
+    color: var(--bs-primary);
+    font-size: 14px;
+}
+
+.achievement-notification-name {
+    font-weight: 500;
+    margin: 2px 0;
+}
+
+.achievement-notification-points {
+    color: var(--bs-success);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Scrollbar for gamification content */
+.gamification-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.gamification-content::-webkit-scrollbar-track {
+    background: var(--bs-light);
+}
+
+.gamification-content::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 3px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .gamification-panel {
+        right: 10px;
+        width: 300px;
+        top: 70px;
+    }
+    
+    .gamification-panel.collapsed {
+        width: 100px;
+        height: 50px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .achievement-item {
+        padding: 10px;
+    }
+    
+    .challenge-card {
+        padding: 12px;
+    }
+    
+    .points-notification,
+    .level-up-notification,
+    .achievement-notification {
+        right: 10px;
+        left: 10px;
+        width: auto;
+        transform: translateY(-100px);
+    }
+    
+    .points-notification.show,
+    .level-up-notification.show,
+    .achievement-notification.show {
+        transform: translateY(0);
+    }
+}

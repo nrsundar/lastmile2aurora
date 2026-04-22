@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}PostgreSQL SQL Optimizer - About{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark">
+                <h3 class="card-title mb-0">About PostgreSQL SQL Optimizer for Amazon Aurora</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    The PostgreSQL SQL Optimizer is a specialized tool designed to assist developers and database 
+                    administrators in transitioning from Oracle PL/SQL and SQL Server T-SQL to Amazon Aurora PostgreSQL,
+                    focusing on the latest three PostgreSQL versions.
+                </p>
+                
+                <h4 class="mt-4">Features</h4>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>SQL Analysis:</strong> Identify performance issues and compatibility problems specific to PostgreSQL
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Optimization Suggestions:</strong> Get detailed recommendations for improving your SQL code
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Code Transformation:</strong> Automatically convert Oracle and SQL Server specific syntax to PostgreSQL
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Batch Processing:</strong> Analyze multiple SQL statements at once
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Side-by-Side Comparison:</strong> View original and optimized code together
+                    </li>
+                </ul>
+                
+                <h4>Migration Challenges Addressed</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Issue Category</th>
+                                <th>Oracle PL/SQL</th>
+                                <th>SQL Server T-SQL</th>
+                                <th>PostgreSQL Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Date Functions</td>
+                                <td>SYSDATE, TO_DATE, TO_CHAR</td>
+                                <td>GETDATE(), DATEADD(), DATEDIFF()</td>
+                                <td>CURRENT_TIMESTAMP, TO_TIMESTAMP, date/time operators</td>
+                            </tr>
+                            <tr>
+                                <td>Pagination</td>
+                                <td>ROWNUM</td>
+                                <td>TOP</td>
+                                <td>LIMIT, OFFSET</td>
+                            </tr>
+                            <tr>
+                                <td>NULL Handling</td>
+                                <td>NVL()</td>
+                                <td>ISNULL()</td>
+                                <td>COALESCE()</td>
+                            </tr>
+                            <tr>
+                                <td>Hierarchical Queries</td>
+                                <td>CONNECT BY</td>
+                                <td>CTE with recursion</td>
+                                <td>WITH RECURSIVE</td>
+                            </tr>
+                            <tr>
+                                <td>Data Types</td>
+                                <td>VARCHAR2, NUMBER</td>
+                                <td>NVARCHAR, UNIQUEIDENTIFIER</td>
+                                <td>VARCHAR, NUMERIC, UUID</td>
+                            </tr>
+                            <tr>
+                                <td>Procedural Code</td>
+                                <td>PL/SQL Blocks</td>
+                                <td>T-SQL Batches</td>
+                                <td>PL/pgSQL Functions</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h4 class="mt-4">How It Works</h4>
+                <ol class="list-group list-group-numbered mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Input SQL Code</div>
+                            Paste your Oracle PL/SQL or SQL Server T-SQL code into the editor
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Analysis</div>
+                            The application parses and analyzes your SQL for PostgreSQL-specific issues
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Optimization</div>
+                            Suggested transformations and optimizations are generated
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Review Results</div>
+                            Review the analysis, recommendations, and optimized code
+                        </div>
+                    </li>
+                </ol>
+                
+                <h4>Best Practices for PostgreSQL Migration</h4>
+                <div class="alert alert-info">
+                    <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Tips for Successful Migrations to Amazon Aurora PostgreSQL</h5>
+                    <ul class="mb-0">
+                        <li>Start with a thorough inventory of your SQL code and database objects</li>
+                        <li>Identify and prioritize proprietary features that need to be redesigned</li>
+                        <li>Test performance in both environments, as query execution plans may differ</li>
+                        <li>Use EXPLAIN ANALYZE to understand query execution in Aurora PostgreSQL</li>
+                        <li>Consider Aurora-specific optimizations (indexes, partitioning, Aurora replicas)</li>
+                        <li>Leverage Aurora PostgreSQL features like global database, fast cloning, and backtrack</li>
+                        <li>Convert complex stored procedures carefully with full PL/pgSQL compatibility</li>
+                        <li>Optimize for Aurora's performance insights and enhanced monitoring</li>
+                        <li>Use Aurora-compatible extensions where available for additional functionality</li>
+                    </ul>
+                </div>
+                
+                <h4 class="mt-4">Amazon Aurora PostgreSQL Version Support</h4>
+                <p>This tool focuses on optimizing for the latest three PostgreSQL versions supported by Amazon Aurora:</p>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>PostgreSQL Version</th>
+                                <th>Aurora PostgreSQL Compatibility</th>
+                                <th>Key Features</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PostgreSQL 16</td>
+                                <td>Aurora PostgreSQL 16 Compatible</td>
+                            </tr>
+                            <tr>
+                                <td>PostgreSQL 15</td>
+                                <td>Aurora PostgreSQL 15 Compatible</td>
+                                <td>MERGE statement, performance improvements, range types enhancements</td>
+                            </tr>
+                            <tr>
+                                <td>PostgreSQL 14</td>
+                                <td>Aurora PostgreSQL 14 Compatible</td>
+                                <td>Improved query parallelism, enhanced JSON path expressions</td>
+                            </tr>
+                            <tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

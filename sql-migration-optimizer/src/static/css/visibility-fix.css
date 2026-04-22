@@ -1,0 +1,326 @@
+/* Global Visibility and Contrast Fixes for Dark Theme */
+
+/* Override Bootstrap dark theme form controls */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+.form-control,
+.form-select {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus,
+.form-control:focus,
+.form-select:focus {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+    border-color: #ff9900 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 153, 0, 0.25) !important;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder,
+.form-control::placeholder {
+    color: #a0aec0 !important;
+    opacity: 1;
+}
+
+/* Input groups */
+[data-bs-theme="dark"] .input-group-text {
+    background-color: #4a5568 !important;
+    color: #e2e8f0 !important;
+    border-color: #4a5568 !important;
+}
+
+/* Text areas and code inputs */
+[data-bs-theme="dark"] textarea.form-control,
+textarea.form-control,
+.font-monospace {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+}
+
+/* Labels and form text */
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] .form-text,
+.form-label,
+.form-text {
+    color: #e2e8f0 !important;
+}
+
+/* Card bodies and content */
+[data-bs-theme="dark"] .card-body {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .card-body p,
+[data-bs-theme="dark"] .card-body div,
+[data-bs-theme="dark"] .card-body span,
+.card-body p,
+.card-body div,
+.card-body span {
+    color: #e2e8f0 !important;
+}
+
+/* List items */
+[data-bs-theme="dark"] .card-body ul li,
+[data-bs-theme="dark"] .card-body ol li,
+.card-body ul li,
+.card-body ol li {
+    color: #e2e8f0 !important;
+}
+
+/* Tables */
+[data-bs-theme="dark"] .table,
+.table {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .table th,
+[data-bs-theme="dark"] .table td,
+.table th,
+.table td {
+    color: #e2e8f0 !important;
+    border-color: #4a5568 !important;
+}
+
+/* Alert content */
+[data-bs-theme="dark"] .alert,
+.alert {
+    border-radius: 0.5rem;
+}
+
+[data-bs-theme="dark"] .alert p,
+[data-bs-theme="dark"] .alert ul,
+[data-bs-theme="dark"] .alert li,
+.alert p,
+.alert ul,
+.alert li {
+    color: inherit !important;
+}
+
+/* Modal content */
+[data-bs-theme="dark"] .modal-content {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-body,
+[data-bs-theme="dark"] .modal-footer {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .modal-body p,
+[data-bs-theme="dark"] .modal-body ul,
+[data-bs-theme="dark"] .modal-body ol,
+[data-bs-theme="dark"] .modal-body li,
+.modal-body p,
+.modal-body ul,
+.modal-body ol,
+.modal-body li {
+    color: #e2e8f0 !important;
+}
+
+/* CodeMirror editor */
+.CodeMirror {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+}
+
+.CodeMirror-gutters {
+    background-color: #2d3748 !important;
+    border-right: 1px solid #4a5568 !important;
+}
+
+.CodeMirror-linenumber {
+    color: #a0aec0 !important;
+}
+
+/* Pre and code blocks */
+pre, code {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+}
+
+pre.bg-dark {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+}
+
+/* Dropdown menus */
+[data-bs-theme="dark"] .dropdown-menu {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+    background-color: #4a5568 !important;
+    color: #ffffff !important;
+}
+
+/* Badges and small text */
+[data-bs-theme="dark"] .text-muted,
+.text-muted {
+    color: #a0aec0 !important;
+}
+
+[data-bs-theme="dark"] small,
+small {
+    color: #a0aec0 !important;
+}
+
+/* Navigation and navbar */
+[data-bs-theme="dark"] .navbar-nav .nav-link {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .navbar-brand {
+    color: #ff9900 !important;
+}
+
+/* Buttons - ensure they remain visible */
+.btn-outline-warning {
+    color: #ff9900 !important;
+    border-color: #ff9900 !important;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ff9900 !important;
+    color: #000000 !important;
+}
+
+/* Progress bars and metrics */
+.progress {
+    background-color: #4a5568 !important;
+}
+
+/* Feature cards and content */
+.feature-card {
+    background-color: transparent !important;
+}
+
+.feature-card h5,
+.feature-card p {
+    color: #e2e8f0 !important;
+}
+
+/* Chatbot styling */
+.chatbot-container {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+}
+
+.chatbot-message {
+    color: #e2e8f0 !important;
+}
+
+/* Analysis results */
+.analysis-results .card-body {
+    color: #e2e8f0 !important;
+}
+
+.analysis-results h6,
+.analysis-results p,
+.analysis-results ul,
+.analysis-results li {
+    color: #e2e8f0 !important;
+}
+
+/* Documentation pages */
+.card-body h5,
+.card-body h6 {
+    color: #e2e8f0 !important;
+}
+
+/* Loading animations */
+.spinner-border {
+    color: #ff9900 !important;
+}
+
+/* Footer and other content */
+footer {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+}
+
+/* Ensure all paragraph text is visible */
+p, div, span, h1, h2, h3, h4, h5, h6 {
+    color: inherit;
+}
+
+[data-bs-theme="dark"] p,
+[data-bs-theme="dark"] div:not(.alert):not(.badge):not(.btn),
+[data-bs-theme="dark"] span:not(.badge),
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+    color: #e2e8f0;
+}
+
+/* Special cases for specific elements */
+.text-warning {
+    color: #ff9900 !important;
+}
+
+.text-primary {
+    color: #60a5fa !important;
+}
+
+.text-success {
+    color: #34d399 !important;
+}
+
+.text-danger {
+    color: #f87171 !important;
+}
+
+.text-info {
+    color: #38bdf8 !important;
+}
+
+/* Container and general layout */
+.container, .container-fluid {
+    color: #e2e8f0;
+}
+
+/* Fix any remaining visibility issues */
+* {
+    box-sizing: border-box;
+}
+
+/* Ensure select options are visible */
+[data-bs-theme="dark"] .form-select option {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Fix accordion content */
+[data-bs-theme="dark"] .accordion-body {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+/* Fix any cards with specific backgrounds */
+.card.border-warning .card-body,
+.card.border-primary .card-body,
+.card.border-success .card-body,
+.card.border-info .card-body,
+.card.border-danger .card-body {
+    color: #e2e8f0 !important;
+}

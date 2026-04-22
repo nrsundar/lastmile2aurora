@@ -2,14 +2,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install sql-migration-optimizer engine
-COPY ../sql-migration-optimizer/src /app/optimizer_engine
-ENV PYTHONPATH="/app/optimizer_engine:${PYTHONPATH}"
-
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the SQL optimizer engine
+COPY sql-migration-optimizer/src/ /app/optimizer_engine/
+ENV PYTHONPATH="/app/optimizer_engine:${PYTHONPATH}"
+
+# Copy backend code
 COPY backend/ /app/
+
+# Copy mock workload data
 COPY mock-workload/ /app/mock-workload/
 
 EXPOSE 8000

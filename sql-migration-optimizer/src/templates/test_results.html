@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}Query Performance Test Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-line me-2"></i>Query Performance Test Results
+            </h1>
+            
+            <!-- Documentation -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>How to Use Performance Testing
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>Getting Started</h6>
+                            <ol>
+                                <li><strong>Setup Test Data:</strong> Click "Setup Test Data" to create sample tables with 1,000 customers, 500 products, and 5,000 orders</li>
+                                <li><strong>Choose Iterations:</strong> Select how many times each query runs (more iterations = more accurate results)</li>
+                                <li><strong>Run Tests:</strong> Click "Run Performance Tests" to compare original vs optimized SQL queries</li>
+                                <li><strong>View Results:</strong> Analyze timing improvements and execution plans</li>
+                                <li><strong>Export Results:</strong> Download detailed performance data for further analysis</li>
+                            </ol>
+                            
+                            <h6 class="mt-3">What Gets Tested</h6>
+                            <ul>
+                                <li><strong>JOIN Syntax:</strong> Implicit comma joins vs explicit INNER JOIN</li>
+                                <li><strong>Subquery Optimization:</strong> IN subqueries vs EXISTS clauses</li>
+                                <li><strong>Aggregation Performance:</strong> Different approaches to GROUP BY with JOINs</li>
+                            </ul>
+                            
+                            <h6 class="mt-3">Example Test Cases</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="text-danger">Original (Slower)</h6>
+                                            <pre class="small mb-0"><code>-- Implicit join
+SELECT c.name, o.total 
+FROM customers c, orders o
+WHERE c.id = o.customer_id</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="text-success">Optimized (Faster)</h6>
+                                            <pre class="small mb-0"><code>-- Explicit join
+SELECT c.name, o.total 
+FROM customers c
+INNER JOIN orders o ON c.id = o.customer_id</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb me-1"></i>Performance Tips</h6>
+                                <ul class="mb-0 small">
+                                    <li>Green badges show performance improvements</li>
+                                    <li>Red badges indicate slower performance</li>
+                                    <li>Use 3+ iterations for reliable results</li>
+                                    <li>Check execution plans for detailed insights</li>
+                                    <li>Results may vary based on data size and indexes</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle me-1"></i>Important Notes</h6>
+                                <ul class="mb-0 small">
+                                    <li>Set up test data before running tests</li>
+                                    <li>Performance results are environment-specific</li>
+                                    <li>Always test with production-like data volumes</li>
+                                    <li>Consider database server configuration</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Overview -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Test Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-primary" id="total-tests">-</h3>
+                                <small class="text-muted">Total Tests</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-success" id="successful-tests">-</h3>
+                                <small class="text-muted">Successful</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-info" id="avg-improvement">-</h3>
+                                <small class="text-muted">Avg Improvement</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-warning" id="test-status">Ready</h3>
+                                <small class="text-muted">Status</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="iterations">Test Iterations:</label>
+                                <select class="form-select" id="iterations">
+                                    <option value="1">1 iteration (Quick)</option>
+                                    <option value="3" selected>3 iterations (Recommended)</option>
+                                    <option value="5">5 iterations (Thorough)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" id="run-tests">
+                                <i class="fas fa-play me-1"></i>Run Performance Tests
+                            </button>
+                            <button class="btn btn-secondary" id="setup-test-data">
+                                <i class="fas fa-database me-1"></i>Setup Test Data
+                            </button>
+                            <button class="btn btn-info" id="export-results" disabled>
+                                <i class="fas fa-download me-1"></i>Export Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="card d-none" id="loading-container">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Running tests...</span>
+                    </div>
+                    <p class="mt-3">Running performance tests. This may take a few minutes...</p>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%" id="test-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div id="test-results-container" class="d-none">
+                <!-- Results will be dynamically loaded here -->
+            </div>
+
+            <!-- Individual Test Results Template -->
+            <div id="test-result-template" class="d-none">
+                <div class="card mb-4 test-result-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 test-name"></h5>
+                        <span class="badge performance-badge"></span>
+                    </div>
+                    <div class="card-body">
+                        <p class="test-description"></p>
+                        
+                        <!-- Performance Metrics -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h6>Original Query</h6>
+                                    <div class="metric-value original-time"></div>
+                                    <small class="text-muted">Avg Total Time (ms)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h6>Optimized Query</h6>
+                                    <div class="metric-value optimized-time"></div>
+                                    <small class="text-muted">Avg Total Time (ms)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded improvement-bg">
+                                    <h6>Improvement</h6>
+                                    <div class="metric-value improvement-percent"></div>
+                                    <small class="text-muted">Faster / Slower</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Metrics -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Execution Details</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Execution Time:</td>
+                                        <td class="original-execution"></td>
+                                        <td class="optimized-execution"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Planning Time:</td>
+                                        <td class="original-planning"></td>
+                                        <td class="optimized-planning"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Rows Returned:</td>
+                                        <td class="original-rows"></td>
+                                        <td class="optimized-rows"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Buffer Usage</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Shared Hit Blocks:</td>
+                                        <td class="original-hit-blocks"></td>
+                                        <td class="optimized-hit-blocks"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Shared Read Blocks:</td>
+                                        <td class="original-read-blocks"></td>
+                                        <td class="optimized-read-blocks"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- SQL Queries -->
+                        <div class="mt-3">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active original-tab" type="button" role="tab">
+                                        Original Query
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link optimized-tab" type="button" role="tab">
+                                        Optimized Query
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link execution-plan-tab" type="button" role="tab">
+                                        Execution Plan
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active original-query-content" role="tabpanel">
+                                    <pre class="language-sql"><code class="original-query-code"></code></pre>
+                                </div>
+                                <div class="tab-pane fade optimized-query-content" role="tabpanel">
+                                    <pre class="language-sql"><code class="optimized-query-code"></code></pre>
+                                </div>
+                                <div class="tab-pane fade execution-plan-content" role="tabpanel">
+                                    <pre class="execution-plan-code"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/test_results.js') }}"></script>
+{% endblock %}

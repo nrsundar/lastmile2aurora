@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}EXPLAIN ANALYZE Documentation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ddl_explain.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-warning">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    EXPLAIN ANALYZE Documentation
+                </h1>
+                <a href="/explain-analysis" class="btn btn-warning">
+                    <i class="fas fa-arrow-right me-1"></i>
+                    Try EXPLAIN Analysis
+                </a>
+            </div>
+
+            <!-- Overview Section -->
+            <div class="card border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">Overview</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">EXPLAIN ANALYZE Analysis automatically parses execution plans to identify performance bottlenecks and provides specific optimization recommendations.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>What It Analyzes:</h5>
+                            <ul>
+                                <li>Execution time and planning overhead</li>
+                                <li>Sequential vs. index scan usage</li>
+                                <li>Join strategy efficiency</li>
+                                <li>Sort operation performance</li>
+                                <li>Buffer hit ratios and I/O patterns</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Benefits:</h5>
+                            <ul>
+                                <li>Identifies specific performance issues</li>
+                                <li>Provides actionable optimization steps</li>
+                                <li>Supports multiple database platforms</li>
+                                <li>Generates index recommendations</li>
+                                <li>Performance scoring and grading</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How to Get EXPLAIN Output -->
+            <div class="card border-info mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">How to Get EXPLAIN ANALYZE Output</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h5 class="text-primary">PostgreSQL</h5>
+                            <div class="code-sample dark">
+                                <code>-- Basic format
+EXPLAIN (ANALYZE, BUFFERS) 
+SELECT * FROM table_name WHERE condition;
+
+-- JSON format (recommended)
+EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) 
+SELECT * FROM table_name WHERE condition;
+
+-- Text format with detailed info
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE, FORMAT TEXT) 
+SELECT * FROM table_name WHERE condition;</code>
+                            </div>
+                            <div class="alert alert-info mt-2">
+                                <small><strong>Tip:</strong> Use BUFFERS for I/O statistics and JSON format for detailed parsing.</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h5 class="text-success">Oracle</h5>
+                            <div class="code-sample dark">
+                                <code>-- Enable timing statistics
+ALTER SESSION SET TIMED_STATISTICS = TRUE;
+
+-- Explain the plan
+EXPLAIN PLAN FOR 
+SELECT * FROM table_name WHERE condition;
+
+-- Display the execution plan
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(
+    NULL, NULL, 'ALLSTATS LAST'));
+
+-- Alternative with actual execution
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(
+    NULL, NULL, 'ALLSTATS LAST'));</code>
+                            </div>
+                            <div class="alert alert-success mt-2">
+                                <small><strong>Note:</strong> Include ALLSTATS for comprehensive statistics.</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h5 class="text-danger">SQL Server</h5>
+                            <div class="code-sample dark">
+                                <code>-- Enable execution statistics
+SET STATISTICS IO ON;
+SET STATISTICS TIME ON;
+
+-- Execute your query
+SELECT * FROM table_name WHERE condition;
+
+-- Or use execution plan
+SET SHOWPLAN_ALL ON;
+SELECT * FROM table_name WHERE condition;
+SET SHOWPLAN_ALL OFF;
+
+-- For actual execution plan
+SET STATISTICS PROFILE ON;
+SELECT * FROM table_name WHERE condition;
+SET STATISTICS PROFILE OFF;</code>
+                            </div>
+                            <div class="alert alert-danger mt-2">
+                                <small><strong>Tip:</strong> Combine IO and TIME statistics for complete analysis.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Guide -->
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Step-by-Step Usage Guide</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h5 class="text-primary">Step 1: Execute EXPLAIN ANALYZE on Your Query</h5>
+                            <p>Run the EXPLAIN ANALYZE command on your problematic query in your database:</p>
+                            <ul>
+                                <li>Include actual execution (ANALYZE option)</li>
+                                <li>Add buffer statistics if available</li>
+                                <li>Use verbose output for detailed information</li>
+                                <li>Copy the complete output including timing</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 2: Prepare Your Query and Output</h5>
+                            <p>Gather both pieces of information:</p>
+                            <ul>
+                                <li><strong>Original Query:</strong> The exact SQL statement that was explained</li>
+                                <li><strong>EXPLAIN Output:</strong> Complete execution plan with timing information</li>
+                                <li><strong>Database Type:</strong> PostgreSQL, Oracle, or SQL Server</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 3: Upload to Analysis Tool</h5>
+                            <ul>
+                                <li>Navigate to EXPLAIN Analysis page</li>
+                                <li>Select your source database type</li>
+                                <li>Paste the original query in the first text area</li>
+                                <li>Paste the complete EXPLAIN output in the second area</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 4: Review Analysis Results</h5>
+                            <p>The analysis will provide:</p>
+                            <ol>
+                                <li><strong>Performance Score:</strong> Overall grade (A-F) with specific metrics</li>
+                                <li><strong>Performance Issues:</strong> Identified bottlenecks with severity levels</li>
+                                <li><strong>Optimization Suggestions:</strong> Actionable recommendations by category</li>
+                                <li><strong>Index Recommendations:</strong> Specific indexes with DDL statements</li>
+                            </ol>
+
+                            <h5 class="text-primary mt-4">Step 5: Implement Recommendations</h5>
+                            <p>Apply optimizations in order of priority:</p>
+                            <ul>
+                                <li>Start with high-severity issues first</li>
+                                <li>Test index recommendations in development</li>
+                                <li>Monitor performance improvements</li>
+                                <li>Re-run EXPLAIN ANALYZE to verify improvements</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card border-secondary h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Performance Thresholds</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-danger">
+                                        <strong>High Severity:</strong>
+                                        <ul class="mb-0">
+                                            <li>Execution time > 1 second</li>
+                                            <li>Sequential scans on large tables</li>
+                                            <li>Expensive nested loops</li>
+                                        </ul>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <strong>Medium Severity:</strong>
+                                        <ul class="mb-0">
+                                            <li>Planning time > 100ms</li>
+                                            <li>Multiple sort operations</li>
+                                            <li>Suboptimal join strategies</li>
+                                        </ul>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <strong>Low Severity:</strong>
+                                        <ul class="mb-0">
+                                            <li>Minor inefficiencies</li>
+                                            <li>Optimization opportunities</li>
+                                            <li>Best practice recommendations</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Analysis -->
+            <div class="card border-success mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Sample Analysis Walkthrough</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Sample Query:</h5>
+                            <div class="code-sample dark">
+                                <code>SELECT c.first_name, c.last_name, o.total_amount
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.city = 'New York'
+    AND o.order_date > '2024-01-01'
+ORDER BY o.total_amount DESC
+LIMIT 100;</code>
+                            </div>
+
+                            <h5 class="mt-3">Sample EXPLAIN Output:</h5>
+                            <div class="code-sample dark">
+                                <code>Limit  (cost=435.71..435.96 rows=100 width=84) 
+       (actual time=45.234..45.267 rows=100 loops=1)
+  ->  Sort  (cost=435.71..438.21 rows=1000 width=84) 
+            (actual time=45.232..45.250 rows=100 loops=1)
+        Sort Key: o.total_amount DESC
+        Sort Method: top-N heapsort  Memory: 43kB
+        ->  Hash Join  (cost=22.50..395.71 rows=1000 width=84) 
+                      (actual time=2.234..43.567 rows=1000 loops=1)
+              Hash Cond: (o.customer_id = c.customer_id)
+              ->  Seq Scan on orders o  (cost=0.00..345.00 rows=5000 width=20) 
+                                      (actual time=0.123..35.234 rows=5000 loops=1)
+                    Filter: (order_date > '2024-01-01'::date)
+                    Rows Removed by Filter: 15000
+              ->  Hash  (cost=20.00..20.00 rows=200 width=68) 
+                       (actual time=1.234..1.234 rows=200 loops=1)
+                    ->  Seq Scan on customers c  (cost=0.00..20.00 rows=200 width=68) 
+                                               (actual time=0.234..1.123 rows=200 loops=1)
+                          Filter: (city = 'New York'::text)
+                          Rows Removed by Filter: 800
+Planning Time: 2.345 ms
+Execution Time: 45.789 ms</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Analysis Results:</h5>
+
+                            <div class="card border-warning mb-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">Performance Score: C (72/100)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Issues Found:</strong> 2 medium severity</p>
+                                    <p><strong>Recommendations:</strong> 3 optimizations</p>
+                                </div>
+                            </div>
+
+                            <h6 class="text-danger">Performance Issues:</h6>
+                            <div class="alert alert-warning">
+                                <strong>Sequential Scans Detected</strong><br>
+                                Query uses 2 sequential scans which may be inefficient.
+                            </div>
+
+                            <h6 class="text-primary">Optimization Suggestions:</h6>
+                            <div class="card border-primary mb-2">
+                                <div class="card-body py-2">
+                                    <h6><span class="badge bg-danger">HIGH</span> Add Missing Indexes</h6>
+                                    <p class="mb-0">Create indexes on frequently filtered columns</p>
+                                </div>
+                            </div>
+
+                            <h6 class="text-success">Index Recommendations:</h6>
+                            <div class="code-sample">
+                                <code>-- High priority indexes
+CREATE INDEX idx_customers_city 
+ON customers USING btree (city);
+
+CREATE INDEX idx_orders_order_date 
+ON orders USING btree (order_date);
+
+-- Medium priority for sorting
+CREATE INDEX idx_orders_total_amount_desc 
+ON orders USING btree (total_amount DESC);</code>
+                            </div>
+
+                            <h6 class="text-info">Expected Improvement:</h6>
+                            <p>Execution time reduction: <strong>60-80%</strong><br>
+                            Eliminates sequential scans, enables index-only operations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Analysis Features -->
+            <div class="card border-info mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">Advanced Analysis Features</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Supported Plan Operations:</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-analysis">
+                                    <thead>
+                                        <tr>
+                                            <th>Operation</th>
+                                            <th>Analysis</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Sequential Scan</td>
+                                            <td>Identifies missing indexes</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Index Scan</td>
+                                            <td>Evaluates index efficiency</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nested Loop</td>
+                                            <td>Detects expensive joins</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Hash Join</td>
+                                            <td>Analyzes memory usage</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sort</td>
+                                            <td>Suggests index elimination</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Aggregate</td>
+                                            <td>Optimization strategies</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 class="mt-4">Performance Metrics:</h5>
+                            <ul>
+                                <li><strong>Execution Time:</strong> Total query runtime</li>
+                                <li><strong>Planning Time:</strong> Query optimization overhead</li>
+                                <li><strong>Buffer Hit Ratio:</strong> Memory vs. disk I/O</li>
+                                <li><strong>Rows Processed:</strong> Data volume analysis</li>
+                                <li><strong>Cost Estimates:</strong> Planner accuracy assessment</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Optimization Categories:</h5>
+                            
+                            <div class="alert alert-primary">
+                                <h6>Indexing Optimizations:</h6>
+                                <ul class="mb-0">
+                                    <li>WHERE clause column indexes</li>
+                                    <li>JOIN condition indexes</li>
+                                    <li>ORDER BY sorting indexes</li>
+                                    <li>Composite index recommendations</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-success">
+                                <h6>Query Rewriting:</h6>
+                                <ul class="mb-0">
+                                    <li>Subquery to JOIN conversion</li>
+                                    <li>EXISTS vs IN optimization</li>
+                                    <li>JOIN order improvements</li>
+                                    <li>Filter condition optimization</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6>Configuration Tuning:</h6>
+                                <ul class="mb-0">
+                                    <li>work_mem adjustments</li>
+                                    <li>shared_buffers optimization</li>
+                                    <li>Statistics target updates</li>
+                                    <li>Parallel query settings</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6>AWS Aurora Specific:</h6>
+                                <ul class="mb-0">
+                                    <li>Parallel query recommendations</li>
+                                    <li>Read replica optimization</li>
+                                    <li>Aurora-specific features</li>
+                                    <li>Auto-scaling considerations</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="card border-secondary mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Troubleshooting & Best Practices</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Common Issues & Solutions:</h5>
+                            
+                            <h6 class="text-danger">Error: "Invalid EXPLAIN format"</h6>
+                            <p><strong>Solution:</strong> Ensure you've copied the complete EXPLAIN output including timing information and execution statistics.</p>
+
+                            <h6 class="text-danger">Error: "Query text is required"</h6>
+                            <p><strong>Solution:</strong> Provide the original SQL query that was used to generate the EXPLAIN output.</p>
+
+                            <h6 class="text-danger">Error: "Parsing error"</h6>
+                            <p><strong>Solution:</strong> Check for unsupported EXPLAIN format variations. Use standard EXPLAIN ANALYZE output.</p>
+
+                            <h6 class="text-warning">No Recommendations Generated</h6>
+                            <p><strong>Reason:</strong> Query may already be well-optimized or the execution plan doesn't show obvious bottlenecks.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Best Practices:</h5>
+                            
+                            <div class="alert alert-success">
+                                <h6>Before Analysis:</h6>
+                                <ul class="mb-0">
+                                    <li>Run ANALYZE on all tables</li>
+                                    <li>Use representative data volumes</li>
+                                    <li>Execute queries multiple times for consistency</li>
+                                    <li>Clear cache for accurate I/O measurements</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6>After Analysis:</h6>
+                                <ul class="mb-0">
+                                    <li>Test recommendations in development first</li>
+                                    <li>Implement one change at a time</li>
+                                    <li>Monitor performance impact</li>
+                                    <li>Re-analyze after optimizations</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6>Performance Monitoring:</h6>
+                                <ul class="mb-0">
+                                    <li>Track query execution trends</li>
+                                    <li>Monitor index usage statistics</li>
+                                    <li>Regular EXPLAIN ANALYZE runs</li>
+                                    <li>Set up performance alerts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center">
+                <a href="{{ url_for('explain_analysis') }}" class="btn btn-warning btn-lg">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Start EXPLAIN Analysis Now
+                </a>
+                <a href="{{ url_for('ddl_docs') }}" class="btn btn-outline-warning btn-lg ms-3">
+                    <i class="fas fa-database me-2"></i>
+                    Learn About DDL Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

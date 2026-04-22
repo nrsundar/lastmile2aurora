@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Introduction - SQL Migration Optimizer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="hero-section text-center py-5 mb-5">
+        <div class="container">
+            <h1 class="display-5 fw-bold text-primary mb-3">SQL Migration Optimizer</h1>
+            <p class="fs-5 text-muted mb-4">Convert SQL code from Oracle and SQL Server to PostgreSQL with optimization recommendations</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <p class="fs-6 text-muted">A supplementary tool to AWS DMS and AWS SCT for SQL code conversion and optimization. Use DMS for data migration and SCT for schema conversion — use this tool for fine-tuning SQL code, analyzing query performance, and getting optimization recommendations for PostgreSQL and Aurora.</p>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Tip:</strong> Use this tool alongside AWS DMS and AWS SCT to fine-tune your converted SQL code and get optimization recommendations for PostgreSQL and Aurora.
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-rocket me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('about') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-info-circle me-2"></i>Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Features Section -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h3 class="fw-bold">Key Features</h3>
+                <p class="fs-6 text-muted">SQL code conversion capabilities for PostgreSQL migration projects</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h5>SQL Code Conversion</h5>
+                    <p class="small text-muted">Convert Oracle PL/SQL and SQL Server T-SQL syntax to PostgreSQL with dialect-specific transformations.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h5>PostgreSQL Optimization</h5>
+                    <p class="small text-muted">Apply PostgreSQL best practices and Aurora-compatible optimizations to converted SQL code.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h5>Batch Processing</h5>
+                    <p class="small text-muted">Process multiple SQL files simultaneously with organized ZIP downloads for large-scale migrations.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h5>Performance Estimation</h5>
+                    <p class="small text-muted">Estimate performance differences between original and converted SQL code with metrics analysis.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h5>Interactive Editor</h5>
+                    <p class="small text-muted">Advanced SQL editor with syntax highlighting, auto-completion, and real-time error detection.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h5>DDL Analysis</h5>
+                    <p class="small text-muted">Upload table DDLs and queries to get intelligent index recommendations with performance analysis.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h5>EXPLAIN Analysis</h5>
+                    <p class="small text-muted">Analyze EXPLAIN ANALYZE output to identify performance bottlenecks and optimization opportunities.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h5>Migration Assistant</h5>
+                    <p class="small text-muted">Interactive guidance for SQL conversion questions and PostgreSQL best practices.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supported Databases Section -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="fw-bold">Supported Database Systems</h2>
+                <p class="text-muted">Migrate from popular database systems to Aurora PostgreSQL</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <div class="db-support-card">
+                            <div class="db-icon oracle">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h5>Oracle</h5>
+                            <p class="text-muted small">PL/SQL procedures, functions, and packages</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 text-center">
+                        <div class="db-support-card">
+                            <div class="db-icon sqlserver">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <h5>SQL Server</h5>
+                            <p class="text-muted small">T-SQL stored procedures and functions</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 text-center">
+                        <div class="db-support-card">
+                            <div class="db-icon postgresql">
+                                <i class="fas fa-elephant"></i>
+                            </div>
+                            <h5>Aurora PostgreSQL</h5>
+                            <p class="text-muted small">Versions 14, 15, and 16 supported</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Migration Process Section -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="fw-bold">Migration Process</h2>
+                <p class="text-muted">Simple 4-step process to migrate your SQL code</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="process-timeline">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h5>Upload SQL Code</h5>
+                            <p class="text-muted">Paste your SQL code or upload files for batch processing</p>
+                        </div>
+                    </div>
+                    
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h5>Analyze & Optimize</h5>
+                            <p class="text-muted">Our analyzer identifies issues and suggests PostgreSQL optimizations</p>
+                        </div>
+                    </div>
+                    
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h5>Review Results</h5>
+                            <p class="text-muted">Compare original and optimized code side-by-side with detailed explanations</p>
+                        </div>
+                    </div>
+                    
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h5>Download & Deploy</h5>
+                            <p class="text-muted">Download optimized SQL files and deploy to your Aurora PostgreSQL database</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack Section -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="fw-bold">Built with Modern Technologies</h2>
+                <p class="text-muted">Reliable, scalable, and secure technology stack</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="tech-category">
+                    <h5><i class="fas fa-server me-2"></i>Backend</h5>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Python Flask</span>
+                        <span class="tech-tag">SQLAlchemy</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">Gunicorn</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="tech-category">
+                    <h5><i class="fas fa-desktop me-2"></i>Frontend</h5>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Bootstrap 5</span>
+                        <span class="tech-tag">CodeMirror</span>
+                        <span class="tech-tag">Chart.js</span>
+                        <span class="tech-tag">JavaScript ES6</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="tech-category">
+                    <h5><i class="fas fa-cloud me-2"></i>Deployment</h5>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Docker</span>
+                        <span class="tech-tag">AWS EC2</span>
+                        <span class="tech-tag">Nginx</span>
+                        <span class="tech-tag">SSL/TLS</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="tech-category">
+                    <h5><i class="fas fa-shield-alt me-2"></i>Security</h5>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Input Validation</span>
+                        <span class="tech-tag">SQL Injection Protection</span>
+                        <span class="tech-tag">Session Management</span>
+                        <span class="tech-tag">HTTPS Enforcement</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="cta-section text-center py-5">
+        <div class="container">
+            <h2 class="fw-bold mb-3">Ready to Start Your Migration?</h2>
+            <p class="lead text-muted mb-4">Get started with SQL Migration Optimizer today and streamline your database migration process.</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play me-2"></i>Start Migration
+                </a>
+                <a href="{{ url_for('batch') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-layer-group me-2"></i>Batch Processing
+                </a>
+                <a href="{{ url_for('test_results') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-chart-line me-2"></i>Performance Testing
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

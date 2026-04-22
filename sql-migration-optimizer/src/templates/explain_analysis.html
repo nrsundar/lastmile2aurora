@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}EXPLAIN ANALYZE Analysis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ddl_explain.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-warning">
+                    <i class="fas fa-chart-line me-2"></i>
+                    EXPLAIN ANALYZE Analysis
+                </h1>
+                <div>
+                    <a href="{{ url_for('explain_docs') }}" class="btn btn-outline-warning me-2">
+                        <i class="fas fa-book me-1"></i>
+                        Documentation
+                    </a>
+                    <button class="btn btn-outline-warning" onclick="showHelpModal()">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Quick Help
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Input Section -->
+                <div class="col-lg-6">
+                    <div class="card border-warning mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload EXPLAIN ANALYZE Output
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="explainAnalysisForm">
+                                <div class="mb-3">
+                                    <label for="sourceType" class="form-label">Source Database Type</label>
+                                    <select class="form-select" id="sourceType">
+                                        <option value="postgresql">PostgreSQL</option>
+                                        <option value="oracle">Oracle</option>
+                                        <option value="sqlserver">SQL Server</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="queryText" class="form-label">
+                                        Original Query
+                                        <small class="text-muted">(The query that was explained)</small>
+                                    </label>
+                                    <textarea class="form-control font-monospace" id="queryText" 
+                                              rows="6" placeholder="Paste your original SQL query here..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="explainOutput" class="form-label">
+                                        EXPLAIN ANALYZE Output
+                                        <small class="text-muted">(Text or JSON format)</small>
+                                    </label>
+                                    <textarea class="form-control font-monospace" id="explainOutput" 
+                                              rows="12" placeholder="Paste your EXPLAIN ANALYZE output here..."></textarea>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-warning" id="analyzeBtn">
+                                        <i class="fas fa-search me-2"></i>
+                                        Analyze Performance
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- How to Get EXPLAIN Output -->
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                How to Get EXPLAIN ANALYZE Output
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <h6>PostgreSQL:</h6>
+                            <code>EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) your_query;</code>
+                            
+                            <h6 class="mt-3">Oracle:</h6>
+                            <code>EXPLAIN PLAN FOR your_query;<br>
+                            SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</code>
+                            
+                            <h6 class="mt-3">SQL Server:</h6>
+                            <code>SET STATISTICS IO ON;<br>
+                            SET STATISTICS TIME ON;<br>
+                            your_query;</code>
+                            
+                            <button class="btn btn-sm btn-outline-info mt-2" onclick="loadSampleExplain()">
+                                Load Sample EXPLAIN Output
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="col-lg-6">
+                    <!-- Loading Animation -->
+                    <div id="loadingAnimation" style="display: none;">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <h5 class="mt-3">Analyzing EXPLAIN Output...</h5>
+                                <p class="text-muted">Identifying performance issues and generating recommendations</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="analysisResults" style="display: none;">
+                        <!-- Performance Score -->
+                        <div class="card border-success mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Performance Score
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="performanceScore"></div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Issues -->
+                        <div class="card border-danger mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Performance Issues
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="performanceIssues"></div>
+                            </div>
+                        </div>
+
+                        <!-- Optimization Suggestions -->
+                        <div class="card border-primary mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    Optimization Suggestions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="optimizationSuggestions"></div>
+                            </div>
+                        </div>
+
+                        <!-- Index Suggestions -->
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-database me-2"></i>
+                                    Index Recommendations
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="indexSuggestions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Animation -->
+                    <div id="loadingAnimation" style="display: none;">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <h5 class="mt-3">Analyzing EXPLAIN Output...</h5>
+                                <p class="text-muted">Identifying performance issues and generating recommendations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">EXPLAIN ANALYZE Analysis Help</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>How to Use EXPLAIN Analysis:</h6>
+                <ol>
+                    <li><strong>Run EXPLAIN ANALYZE:</strong> Execute EXPLAIN ANALYZE on your query in your database</li>
+                    <li><strong>Copy Output:</strong> Copy the complete output (text or JSON format)</li>
+                    <li><strong>Paste Here:</strong> Paste both the original query and EXPLAIN output</li>
+                    <li><strong>Analyze:</strong> Get performance insights and optimization recommendations</li>
+                </ol>
+
+                <h6 class="mt-4">What It Analyzes:</h6>
+                <ul>
+                    <li><strong>Execution Time:</strong> Query performance metrics</li>
+                    <li><strong>Scan Types:</strong> Sequential vs. index scans</li>
+                    <li><strong>Join Strategies:</strong> Nested loops, hash joins, merge joins</li>
+                    <li><strong>Sorting Operations:</strong> Sort performance and optimization</li>
+                    <li><strong>Buffer Usage:</strong> Memory and I/O efficiency</li>
+                </ul>
+
+                <h6 class="mt-4">Recommendations Include:</h6>
+                <ul>
+                    <li>Missing index suggestions</li>
+                    <li>Query rewriting opportunities</li>
+                    <li>Configuration tuning hints</li>
+                    <li>Join optimization strategies</li>
+                    <li>Performance improvement estimates</li>
+                </ul>
+
+                <h6 class="mt-4">Supported Formats:</h6>
+                <ul>
+                    <li>PostgreSQL EXPLAIN (ANALYZE, BUFFERS) output</li>
+                    <li>Oracle execution plans</li>
+                    <li>SQL Server execution plans and statistics</li>
+                    <li>Both text and JSON formats</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/explain_analysis.js') }}"></script>
+{% endblock %}

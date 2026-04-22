@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}PostgreSQL SQL Optimizer - Batch Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark">
+                <h3 class="card-title mb-0">Batch SQL Analysis</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Analyze multiple SQL statements at once. Separate each statement with a semicolon (;) or 
+                    enter each statement on a new line preceded by "--statement".
+                </p>
+                <form id="batch-form">
+                    <div class="mb-3">
+                        <label for="source-type" class="form-label">Source Database Type</label>
+                        <select class="form-select" id="source-type" name="source_type">
+                            <option value="oracle" selected>Oracle PL/SQL</option>
+                            <option value="sqlserver">SQL Server T-SQL</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="batch-input" class="form-label">SQL Statements</label>
+                        <textarea id="batch-input" class="form-control" rows="12" placeholder="Enter multiple SQL statements separated by semicolons (;) or on new lines with --statement prefix"></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="clear-batch-button">
+                            <i class="fas fa-eraser me-1"></i>Clear
+                        </button>
+                        <div>
+                            <button type="button" class="btn btn-primary" id="analyze-batch-button">
+                                <i class="fas fa-search me-1"></i>Analyze Batch
+                            </button>
+                            <div class="spinner-border text-primary d-none" id="batch-loading-spinner" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Results -->
+<div id="batch-results-container" class="d-none">
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark">
+                    <h4 class="mb-0">Batch Analysis Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>Batch Summary:</strong> <span id="batch-summary"></span>
+                    </div>
+                    
+                    <div id="accordion-container">
+                        <!-- Accordion items will be added here dynamically -->
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-primary" id="export-batch-results">
+                            <i class="fas fa-download me-1"></i>Export Report
+                        </button>
+                        <button class="btn btn-success" id="download-all-sql">
+                            <i class="fas fa-file-archive me-1"></i>Download All SQL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize batch editor
+        const batchEditor = CodeMirror.fromTextArea(document.getElementById('batch-input'), {
+            mode: 'text/x-sql',
+            theme: 'darcula',
+            lineNumbers: true,
+            matchBrackets: true,
+            indentWithTabs: false,
+            indentUnit: 4,
+            lineWrapping: true,
+            extraKeys: {"Ctrl-Space": "autocomplete"},
+            hintOptions: {tables: {}}
+        });
+        
+        // Clear batch button
+        document.getElementById('clear-batch-button').addEventListener('click', function() {
+            batchEditor.setValue('');
+            document.getElementById('batch-results-container').classList.add('d-none');
+        });
+        
+        // Analyze batch button
+        document.getElementById('analyze-batch-button').addEventListener('click', function() {
+            const batchSql = batchEditor.getValue();
+            if (!batchSql.trim()) {
+                alert('Please enter SQL statements to analyze');
+                return;
+            }
+            
+            // Parse the batch into individual statements
+            const statements = parseBatchStatements(batchSql);
+            if (statements.length === 0) {
+                alert('No valid SQL statements found. Please check your input.');
+                return;
+            }
+            
+            // Show spinner
+            document.getElementById('analyze-batch-button').classList.add('d-none');
+            document.getElementById('batch-loading-spinner').classList.remove('d-none');
+            
+            // Get source type
+            const sourceType = document.getElementById('source-type').value;
+            
+            // Call API to analyze batch
+            fetch('/api/batch_analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sql_statements: statements,
+                    source_type: sourceType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide spinner
+                document.getElementById('analyze-batch-button').classList.remove('d-none');
+                document.getElementById('batch-loading-spinner').classList.add('d-none');
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Show results
+                displayBatchResults(data.results);
+                document.getElementById('batch-results-container').classList.remove('d-none');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during analysis');
+                
+                // Hide spinner
+                document.getElementById('analyze-batch-button').classList.remove('d-none');
+                document.getElementById('batch-loading-spinner').classList.add('d-none');
+            });
+        });
+        
+        // Export batch results
+        document.getElementById('export-batch-results').addEventListener('click', function() {
+            // Get the results container
+            const resultsContainer = document.getElementById('accordion-container');
+            
+            // Create export content
+            let exportContent = "# PostgreSQL SQL Optimization Report\n\n";
+            
+            // Loop through each accordion item
+            const accordionItems = resultsContainer.getElementsByClassName('accordion-item');
+            
+            for (let i = 0; i < accordionItems.length; i++) {
+                const header = accordionItems[i].querySelector('.accordion-header').textContent.trim();
+                const bodyOriginal = accordionItems[i].querySelector('.original-sql').textContent;
+                const bodyOptimized = accordionItems[i].querySelector('.optimized-sql').textContent;
+                
+                // Add to export content
+                exportContent += `## Statement ${i+1}: ${header}\n\n`;
+                exportContent += "### Original SQL\n```sql\n" + bodyOriginal + "\n```\n\n";
+                exportContent += "### Optimized SQL\n```sql\n" + bodyOptimized + "\n```\n\n";
+                
+                // Add issues
+                const issuesList = accordionItems[i].querySelector('.issues-list');
+                if (issuesList) {
+                    exportContent += "### Issues and Recommendations\n";
+                    
+                    const issues = issuesList.querySelectorAll('.issue-item');
+                    issues.forEach(issue => {
+                        const message = issue.querySelector('.issue-message').textContent;
+                        const recommendation = issue.querySelector('.issue-recommendation').textContent;
+                        
+                        exportContent += `- **${message}**\n  - Recommendation: ${recommendation}\n`;
+                    });
+                    
+                    exportContent += "\n";
+                }
+                
+                exportContent += "---\n\n";
+            }
+            
+            // Create a download link
+            const blob = new Blob([exportContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sql_optimization_report.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Helper function to parse batch statements
+        function parseBatchStatements(batchSql) {
+            // Split by semicolon or by --statement marker
+            const statements = [];
+            
+            // First, try splitting by --statement
+            const statementMarkerRegex = /--statement/gi;
+            if (statementMarkerRegex.test(batchSql)) {
+                // Split by the marker and filter out empty entries
+                batchSql.split(/--statement/i).forEach(stmt => {
+                    const trimmedStmt = stmt.trim();
+                    if (trimmedStmt) {
+                        statements.push(trimmedStmt);
+                    }
+                });
+            } else {
+                // If no markers found, split by semicolon
+                batchSql.split(';').forEach(stmt => {
+                    const trimmedStmt = stmt.trim();
+                    if (trimmedStmt) {
+                        statements.push(trimmedStmt);
+                    }
+                });
+            }
+            
+            return statements;
+        }
+        
+        // Helper function to display batch results
+        function displayBatchResults(results) {
+            const accordionContainer = document.getElementById('accordion-container');
+            accordionContainer.innerHTML = '';
+            
+            // Update batch summary
+            document.getElementById('batch-summary').textContent = 
+                `${results.length} SQL statement(s) analyzed`;
+            
+            // Create accordion items for each result
+            results.forEach((result, index) => {
+                const issueCount = (result.analysis.issues || []).length;
+                const warningCount = (result.analysis.warnings || []).length;
+                
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item mb-3';
+                
+                // Create header
+                const headerId = `heading-${index}`;
+                const collapseId = `collapse-${index}`;
+                
+                const header = document.createElement('h2');
+                header.className = 'accordion-header';
+                header.id = headerId;
+                
+                const button = document.createElement('button');
+                button.className = 'accordion-button collapsed';
+                button.type = 'button';
+                button.setAttribute('data-bs-toggle', 'collapse');
+                button.setAttribute('data-bs-target', `#${collapseId}`);
+                button.setAttribute('aria-expanded', 'false');
+                button.setAttribute('aria-controls', collapseId);
+                
+                // Determine a preview of the SQL statement (first 50 chars)
+                const sqlPreview = result.original_sql.substring(0, 50).replace(/\s+/g, ' ').trim() + 
+                                   (result.original_sql.length > 50 ? '...' : '');
+                
+                // Create badge for issues/warnings
+                let badgeHtml = '';
+                if (issueCount > 0) {
+                    badgeHtml += `<span class="badge bg-danger ms-2">${issueCount} Issue${issueCount !== 1 ? 's' : ''}</span>`;
+                }
+                if (warningCount > 0) {
+                    badgeHtml += `<span class="badge bg-warning ms-2">${warningCount} Warning${warningCount !== 1 ? 's' : ''}</span>`;
+                }
+                
+                button.innerHTML = `Statement ${index + 1}: ${sqlPreview} ${badgeHtml}`;
+                header.appendChild(button);
+                accordionItem.appendChild(header);
+                
+                // Create body
+                const collapseDiv = document.createElement('div');
+                collapseDiv.id = collapseId;
+                collapseDiv.className = 'accordion-collapse collapse';
+                collapseDiv.setAttribute('aria-labelledby', headerId);
+                
+                const body = document.createElement('div');
+                body.className = 'accordion-body';
+                
+                // Add original and optimized SQL
+                body.innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Original SQL</h5>
+                            <pre class="original-sql bg-dark text-light p-3 rounded">${result.original_sql}</pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Optimized SQL</h5>
+                            <pre class="optimized-sql bg-dark text-light p-3 rounded">${result.optimized_sql}</pre>
+                        </div>
+                    </div>
+                `;
+                
+                // Add issues and warnings if any
+                if (issueCount > 0 || warningCount > 0) {
+                    let issuesHtml = '<h5>Issues and Recommendations</h5><div class="issues-list">';
+                    
+                    // Add issues
+                    if (result.analysis.issues && result.analysis.issues.length > 0) {
+                        result.analysis.issues.forEach(issue => {
+                            issuesHtml += `
+                                <div class="issue-item alert alert-danger">
+                                    <strong class="issue-message">${issue.message}</strong>
+                                    <p class="mb-0 issue-recommendation">${issue.recommendation}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Add warnings
+                    if (result.analysis.warnings && result.analysis.warnings.length > 0) {
+                        result.analysis.warnings.forEach(warning => {
+                            issuesHtml += `
+                                <div class="issue-item alert alert-warning">
+                                    <strong class="issue-message">${warning.message}</strong>
+                                    <p class="mb-0 issue-recommendation">${warning.recommendation}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    issuesHtml += '</div>';
+                    body.innerHTML += issuesHtml;
+                }
+                
+                // Add optimization details if any
+                if (result.optimization_details && result.optimization_details.length > 0) {
+                    let detailsHtml = '<h5>Optimization Details</h5><ul class="list-group mb-3">';
+                    
+                    result.optimization_details.forEach(detail => {
+                        detailsHtml += `
+                            <li class="list-group-item">
+                                <strong>${detail.type}</strong>: ${detail.description}
+                                <div><small>Changed: <code>${detail.original}</code> to <code>${detail.replacement}</code></small></div>
+                            </li>
+                        `;
+                    });
+                    
+                    detailsHtml += '</ul>';
+                    body.innerHTML += detailsHtml;
+                }
+                
+                collapseDiv.appendChild(body);
+                accordionItem.appendChild(collapseDiv);
+                
+                accordionContainer.appendChild(accordionItem);
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,547 @@
+/* Custom styles for SQL Migration Optimizer - Dark Theme AWS Inspired Design */
+
+:root {
+    --aws-bg-primary: #1a202c;
+    --aws-bg-secondary: #2d3748;
+    --aws-bg-tertiary: #4a5568;
+    --aws-border: #4a5568;
+    --aws-text-primary: #e2e8f0;
+    --aws-text-secondary: #a0aec0;
+    --aws-orange: #ff9900;
+    --aws-orange-light: #ffb84d;
+    --aws-orange-dark: #e88600;
+    --aws-blue: #60a5fa;
+    --aws-blue-light: #93c5fd;
+    --aws-success: #34d399;
+    --aws-warning: #ff9900;
+    --aws-danger: #f87171;
+    --aws-accent: #ec7211;
+}
+
+[data-bs-theme="dark"] body,
+body {
+    font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    background-color: var(--aws-bg-primary) !important;
+    color: var(--aws-text-primary) !important;
+}
+
+[data-bs-theme="dark"] .navbar,
+.navbar {
+    background-color: var(--aws-bg-secondary) !important;
+    border-bottom: 2px solid var(--aws-border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-bs-theme="dark"] .navbar-brand,
+.navbar-brand {
+    color: var(--aws-orange) !important;
+    font-weight: 600;
+}
+
+[data-bs-theme="dark"] .nav-link,
+.nav-link {
+    color: var(--aws-text-secondary) !important;
+}
+
+[data-bs-theme="dark"] .nav-link:hover,
+[data-bs-theme="dark"] .nav-link.active,
+.nav-link:hover, 
+.nav-link.active {
+    color: var(--aws-orange) !important;
+}
+
+[data-bs-theme="dark"] .nav-link.active,
+.nav-link.active {
+    font-weight: 600;
+}
+
+[data-bs-theme="dark"] .container-fluid,
+.container-fluid {
+    background-color: var(--aws-bg-primary) !important;
+    color: var(--aws-text-primary) !important;
+}
+
+[data-bs-theme="dark"] .card,
+.card {
+    background-color: var(--aws-bg-secondary) !important;
+    border: 1px solid var(--aws-border) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+    color: var(--aws-text-primary) !important;
+}
+
+[data-bs-theme="dark"] .card-header,
+.card-header {
+    background-color: var(--aws-bg-tertiary) !important;
+    border-bottom: 1px solid var(--aws-border) !important;
+    color: var(--aws-text-primary) !important;
+}
+
+[data-bs-theme="dark"] .btn-secondary,
+.btn-secondary {
+    background-color: var(--aws-text-secondary) !important;
+    border-color: var(--aws-text-secondary) !important;
+    color: white !important;
+}
+
+[data-bs-theme="dark"] .btn-secondary:hover,
+.btn-secondary:hover {
+    background-color: var(--aws-text-primary) !important;
+    border-color: var(--aws-text-primary) !important;
+    color: white !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary,
+.btn-outline-secondary {
+    border-color: var(--aws-text-secondary) !important;
+    color: var(--aws-text-secondary) !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary:hover,
+.btn-outline-secondary:hover {
+    background-color: var(--aws-text-secondary) !important;
+    border-color: var(--aws-text-secondary) !important;
+    color: white !important;
+}
+
+[data-bs-theme="dark"] .alert-info,
+.alert-info {
+    background-color: rgba(255, 153, 0, 0.2) !important;
+    border-color: var(--aws-orange) !important;
+    color: var(--aws-text-primary) !important;
+}
+
+.text-info {
+    color: var(--aws-orange) !important;
+}
+
+.border-primary {
+    border-color: var(--aws-orange) !important;
+}
+
+.bg-primary {
+    background-color: var(--aws-orange) !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--aws-orange) !important;
+    color: var(--aws-text-primary);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--aws-orange) !important;
+    border-color: var(--aws-orange) var(--aws-orange) var(--aws-bg-secondary) !important;
+}
+
+.btn-primary {
+    background-color: var(--aws-orange);
+    border-color: var(--aws-orange);
+    color: #232f3e;
+}
+
+.btn-primary:hover {
+    background-color: var(--aws-orange-dark);
+    border-color: var(--aws-orange-dark);
+    color: #232f3e;
+}
+
+.btn-outline-primary {
+    border-color: var(--aws-orange);
+    color: var(--aws-orange);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--aws-orange);
+    border-color: var(--aws-orange);
+    color: #232f3e;
+}
+
+.text-primary {
+    color: var(--aws-orange) !important;
+}
+
+.text-info {
+    color: var(--aws-blue) !important;
+}
+
+/* Editor styling */
+.CodeMirror {
+    height: auto;
+    min-height: 200px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.25rem;
+}
+
+.CodeMirror-focused {
+    border-color: var(--bs-primary);
+}
+
+/* Code display styling */
+.code-display {
+    height: 300px;
+    overflow: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.25rem;
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    padding: 10px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre;
+}
+
+/* Issue categories styling */
+.issue-item {
+    margin-bottom: 8px;
+    border-left-width: 4px !important;
+}
+
+.issue-item.error {
+    border-left-color: var(--bs-danger) !important;
+}
+
+.issue-item.warning {
+    border-left-color: var(--bs-warning) !important;
+}
+
+.issue-item.info {
+    border-left-color: var(--bs-info) !important;
+}
+
+/* Added padding for accordion items to improve readability */
+.accordion-body {
+    padding: 1.25rem;
+}
+
+/* Recent queries list styling */
+.recent-query-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.recent-query-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.recent-query-preview {
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Line highlight for diffs */
+.diff-add {
+    background-color: rgba(40, 167, 69, 0.2);
+}
+
+.diff-remove {
+    background-color: rgba(220, 53, 69, 0.2);
+}
+
+/* Improved focus styles for accessibility */
+button:focus, 
+.form-control:focus, 
+.form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Navbar customization */
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* Make sure the footer stays at the bottom */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .code-display {
+        height: 200px;
+    }
+    
+    .tab-content {
+        margin-top: 1rem;
+    }
+}
+
+/* Introduction Page Styles */
+.hero-section {
+    background: linear-gradient(135deg, var(--aws-bg-secondary) 0%, var(--aws-bg-tertiary) 100%);
+    border-bottom: 2px solid var(--aws-border);
+}
+
+.feature-card {
+    background-color: var(--aws-bg-tertiary);
+    border: 1px solid var(--aws-border);
+    border-radius: 8px;
+    padding: 30px 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: var(--aws-orange);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--aws-orange), var(--aws-accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 28px;
+}
+
+.feature-card h4 {
+    color: var(--aws-text-primary);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.db-support-card {
+    background-color: var(--aws-bg-tertiary);
+    border: 1px solid var(--aws-border);
+    border-radius: 8px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.db-support-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.db-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 24px;
+}
+
+.db-icon.oracle {
+    background: linear-gradient(135deg, #f80000, #ff4444);
+}
+
+.db-icon.sqlserver {
+    background: linear-gradient(135deg, #cc2927, #ff5555);
+}
+
+.db-icon.postgresql {
+    background: linear-gradient(135deg, #336791, #5599cc);
+}
+
+.process-timeline {
+    position: relative;
+}
+
+.process-step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.process-step:not(:last-child):before {
+    content: '';
+    position: absolute;
+    left: 25px;
+    top: 50px;
+    width: 2px;
+    height: 30px;
+    background-color: var(--aws-border);
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--aws-orange), var(--aws-accent));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.step-content h5 {
+    color: var(--aws-text-primary);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.tech-category {
+    background-color: var(--aws-bg-tertiary);
+    border: 1px solid var(--aws-border);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.tech-category h5 {
+    color: var(--aws-text-primary);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tech-tag {
+    background-color: var(--aws-bg-secondary);
+    color: var(--aws-text-secondary);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    border: 1px solid var(--aws-border);
+}
+
+.cta-section {
+    background: linear-gradient(135deg, var(--aws-bg-secondary) 0%, var(--aws-bg-tertiary) 100%);
+    border-top: 2px solid var(--aws-border);
+    margin-top: 50px;
+}
+
+/* Performance Metrics Styles */
+.performance-gauge {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--aws-text-primary);
+}
+
+.gauge-progress {
+    transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.complexity-score {
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.complexity-score.original {
+    background-color: var(--aws-bg-secondary);
+    border: 2px solid #dc3545;
+}
+
+.complexity-score.optimized {
+    background-color: var(--aws-bg-secondary);
+    border: 2px solid #198754;
+}
+
+.score-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--aws-text-primary);
+}
+
+.score-label {
+    font-size: 14px;
+    color: var(--aws-text-secondary);
+    margin-top: 5px;
+}
+
+.metric-item {
+    padding: 8px 0;
+}
+
+.resource-metrics .progress {
+    background-color: var(--aws-bg-secondary);
+}
+
+.improvement-factors ul {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.benefits-list h6 {
+    color: var(--aws-text-primary);
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.recommendations-list .alert {
+    margin-bottom: 8px;
+    padding: 12px 15px;
+}
+
+/* Performance metrics responsive design */
+@media (max-width: 768px) {
+    .performance-gauge {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .gauge-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .gauge-text {
+        font-size: 14px;
+    }
+    
+    .complexity-score {
+        padding: 15px;
+    }
+    
+    .score-value {
+        font-size: 20px;
+    }
+}

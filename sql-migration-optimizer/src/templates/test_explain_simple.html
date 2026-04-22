@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>EXPLAIN Analysis Test</title></head>
+<body>
+<h1>EXPLAIN Analysis - Simple Test</h1>
+<form id="explainForm">
+  <label>Query:</label><br>
+  <textarea id="query" rows="5" cols="80" placeholder="Enter your SQL query"></textarea><br><br>
+  <label>EXPLAIN ANALYZE Output:</label><br>
+  <textarea id="explain" rows="10" cols="80" placeholder="Paste EXPLAIN ANALYZE output"></textarea><br><br>
+  <button type="submit">Analyze</button>
+</form>
+<pre id="results"></pre>
+<script>
+document.getElementById('explainForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const res = await fetch('/api/analyze_explain', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      query_text: document.getElementById('query').value,
+      explain_output: document.getElementById('explain').value,
+      source_type: 'postgresql'
+    })
+  });
+  document.getElementById('results').textContent = JSON.stringify(await res.json(), null, 2);
+});
+</script>
+</body>
+</html>

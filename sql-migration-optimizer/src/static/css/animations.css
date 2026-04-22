@@ -1,0 +1,324 @@
+/* Advanced Loading Animations for SQL Performance Testing */
+
+.loading-container {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SQL Query Animation */
+.sql-loading {
+    position: relative;
+    width: 120px;
+    height: 60px;
+    margin: 20px 0;
+}
+
+.sql-loading::before {
+    content: "SELECT";
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: var(--bs-primary);
+    animation: typewriter 2s infinite;
+}
+
+.sql-loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 20px;
+    background: var(--bs-primary);
+    animation: cursor-blink 1s infinite;
+}
+
+@keyframes typewriter {
+    0%, 10% { content: "S"; }
+    10%, 20% { content: "SE"; }
+    20%, 30% { content: "SEL"; }
+    30%, 40% { content: "SELE"; }
+    40%, 50% { content: "SELEC"; }
+    50%, 90% { content: "SELECT"; }
+    90%, 100% { content: ""; }
+}
+
+@keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Performance Meter Animation */
+.performance-meter {
+    width: 200px;
+    height: 20px;
+    background: var(--bs-light);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 20px 0;
+}
+
+.performance-meter::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        var(--bs-danger) 0%, 
+        var(--bs-warning) 50%, 
+        var(--bs-success) 100%);
+    animation: performance-scan 3s infinite;
+    border-radius: 10px;
+}
+
+@keyframes performance-scan {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 100%; }
+}
+
+/* Database Connection Animation */
+.db-connection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.db-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--bs-info);
+    border-radius: 8px;
+    position: relative;
+    animation: pulse 2s infinite;
+}
+
+.db-icon::before {
+    content: "🗄️";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+}
+
+.connection-line {
+    width: 80px;
+    height: 4px;
+    background: var(--bs-secondary);
+    position: relative;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.connection-line::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--bs-primary) 50%, 
+        transparent 100%);
+    animation: data-flow 1.5s infinite;
+}
+
+@keyframes data-flow {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* Progress Waves */
+.progress-waves {
+    width: 100%;
+    height: 60px;
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(var(--bs-primary-rgb), 0.1) 0%, 
+        rgba(var(--bs-primary-rgb), 0.3) 50%, 
+        rgba(var(--bs-primary-rgb), 0.1) 100%);
+    border-radius: 50% 50% 0 0;
+    animation: wave-motion 3s ease-in-out infinite;
+}
+
+.wave:nth-child(2) {
+    animation-delay: -1s;
+    opacity: 0.7;
+}
+
+.wave:nth-child(3) {
+    animation-delay: -2s;
+    opacity: 0.5;
+}
+
+@keyframes wave-motion {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    50% { transform: translateY(-20px) scaleX(1.1); }
+}
+
+/* Spinning SQL Icons */
+.sql-icons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.sql-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--bs-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    animation: spin-bounce 2s infinite;
+}
+
+.sql-icon:nth-child(1) { animation-delay: 0s; }
+.sql-icon:nth-child(2) { animation-delay: 0.3s; }
+.sql-icon:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes spin-bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
+    40% { transform: translateY(-20px) rotate(180deg); }
+    60% { transform: translateY(-10px) rotate(270deg); }
+}
+
+/* Loading Text Animation */
+.loading-text {
+    font-size: 1.1rem;
+    color: var(--bs-secondary);
+    margin: 10px 0;
+    position: relative;
+}
+
+.loading-text::after {
+    content: "...";
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: "."; }
+    40% { content: ".."; }
+    60%, 100% { content: "..."; }
+}
+
+/* Results Fade In */
+.results-fade-in {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Success Animation */
+.success-checkmark {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--bs-success);
+    position: relative;
+    margin: 20px auto;
+    animation: success-pop 0.6s ease-out;
+}
+
+.success-checkmark::before {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+@keyframes success-pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Error Animation */
+.error-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Progress Ring */
+.progress-ring {
+    width: 80px;
+    height: 80px;
+    margin: 20px auto;
+}
+
+.progress-ring-circle {
+    stroke: var(--bs-primary);
+    stroke-width: 4;
+    fill: transparent;
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 251.2;
+    animation: progress-ring-fill 3s infinite;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+@keyframes progress-ring-fill {
+    0% { stroke-dashoffset: 251.2; }
+    100% { stroke-dashoffset: 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sql-loading { width: 80px; height: 40px; }
+    .performance-meter { width: 150px; }
+    .db-connection { flex-direction: column; gap: 5px; }
+    .connection-line { width: 40px; height: 2px; }
+    .sql-icons { gap: 10px; }
+    .sql-icon { width: 25px; height: 25px; font-size: 10px; }
+}

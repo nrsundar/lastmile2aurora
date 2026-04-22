@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}DDL Analysis & Index Recommendations{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ddl_explain.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-warning">
+                    <i class="fas fa-database me-2"></i>
+                    DDL Analysis & Index Recommendations
+                </h1>
+                <div>
+                    <a href="{{ url_for('ddl_docs') }}" class="btn btn-outline-warning me-2">
+                        <i class="fas fa-book me-1"></i>
+                        Documentation
+                    </a>
+                    <button class="btn btn-outline-warning" onclick="showHelpModal()">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Quick Help
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Input Section -->
+                <div class="col-lg-6">
+                    <div class="card border-warning mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload DDL & Query
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="ddlAnalysisForm">
+                                <div class="mb-3">
+                                    <label for="schemaName" class="form-label">Schema Name</label>
+                                    <input type="text" class="form-control" id="schemaName" 
+                                           placeholder="Enter schema name" value="analysis_schema">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="sourceType" class="form-label">Source Database Type</label>
+                                    <select class="form-select" id="sourceType">
+                                        <option value="postgresql">PostgreSQL</option>
+                                        <option value="oracle">Oracle</option>
+                                        <option value="sqlserver">SQL Server</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="targetVersion" class="form-label">Target PostgreSQL Version</label>
+                                    <select class="form-select" id="targetVersion">
+                                        <option value="16">PostgreSQL 16</option>
+                                        <option value="15">PostgreSQL 15</option>
+                                        <option value="14">PostgreSQL 14</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ddlContent" class="form-label">
+                                        Table DDL Statements
+                                        <small class="text-muted">(CREATE TABLE statements)</small>
+                                    </label>
+                                    <textarea class="form-control font-monospace" id="ddlContent" 
+                                              rows="8" placeholder="Paste your CREATE TABLE statements here..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="queryContent" class="form-label">
+                                        Query to Analyze
+                                        <small class="text-muted">(SELECT statement to optimize)</small>
+                                    </label>
+                                    <textarea class="form-control font-monospace" id="queryContent" 
+                                              rows="6" placeholder="Paste your SELECT query here..."></textarea>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-warning" id="analyzeBtn">
+                                        <i class="fas fa-search me-2"></i>
+                                        Analyze & Generate Index Recommendations
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Sample Data Section -->
+                    <div class="card border-secondary">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Sample DDL & Query
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadSampleData()">
+                                Load Sample Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="col-lg-6">
+                    <div id="analysisResults" style="display: none;">
+                        <!-- Index Recommendations -->
+                        <div class="card border-success mb-4">
+                            <div class="card-header bg-success text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-list-ol me-2"></i>
+                                        Index Recommendations
+                                    </h5>
+                                    <button class="btn btn-light btn-sm" id="downloadIndexesBtn">
+                                        <i class="fas fa-download me-1"></i>
+                                        Download DDL
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="indexRecommendations"></div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Comparison -->
+                        <div class="card border-info mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Performance Analysis
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="performanceComparison"></div>
+                            </div>
+                        </div>
+
+                        <!-- Generated DDL -->
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-code me-2"></i>
+                                    Generated Index DDL
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <pre id="generatedDDL" class="bg-dark text-light p-3 rounded"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Animation -->
+                    <div id="loadingAnimation" style="display: none;">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <h5 class="mt-3">Analyzing DDL and Query...</h5>
+                                <p class="text-muted">Creating tables, generating sample data, and analyzing performance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">DDL Analysis Help</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>How to Use DDL Analysis:</h6>
+                <ol>
+                    <li><strong>Upload Table DDLs:</strong> Paste your CREATE TABLE statements</li>
+                    <li><strong>Add Query:</strong> Provide the SELECT query you want to optimize</li>
+                    <li><strong>Select Source Type:</strong> Choose your source database type</li>
+                    <li><strong>Analyze:</strong> Click analyze to get index recommendations</li>
+                </ol>
+
+                <h6 class="mt-4">What It Does:</h6>
+                <ul>
+                    <li>Creates temporary tables with sample data</li>
+                    <li>Analyzes query execution plan</li>
+                    <li>Recommends optimal indexes</li>
+                    <li>Generates ready-to-use DDL statements</li>
+                    <li>Compares performance before and after indexes</li>
+                </ul>
+
+                <h6 class="mt-4">Supported Features:</h6>
+                <ul>
+                    <li>Multiple table analysis</li>
+                    <li>Complex JOIN queries</li>
+                    <li>WHERE clause optimization</li>
+                    <li>ORDER BY performance</li>
+                    <li>Composite index recommendations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/ddl_analysis.js') }}"></script>
+{% endblock %}

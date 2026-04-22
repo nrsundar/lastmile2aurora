@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}DDL Analysis Documentation{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-warning">
+                    <i class="fas fa-database me-2"></i>
+                    DDL Analysis Documentation
+                </h1>
+                <a href="{{ url_for('ddl_analysis') }}" class="btn btn-warning">
+                    <i class="fas fa-arrow-right me-1"></i>
+                    Try DDL Analysis
+                </a>
+            </div>
+
+            <!-- Overview Section -->
+            <div class="card border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">Overview</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">DDL Analysis automatically creates tables with sample data, analyzes query performance, and recommends optimal indexes for your PostgreSQL database.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>What It Does:</h5>
+                            <ul>
+                                <li>Parses your table DDL statements</li>
+                                <li>Creates temporary tables with 1,000 sample rows</li>
+                                <li>Analyzes query execution plans</li>
+                                <li>Recommends priority-based indexes</li>
+                                <li>Generates production-ready DDL statements</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Benefits:</h5>
+                            <ul>
+                                <li>Identifies missing indexes before production</li>
+                                <li>Estimates performance improvements</li>
+                                <li>Supports complex multi-table queries</li>
+                                <li>Provides AWS Aurora optimizations</li>
+                                <li>Downloadable index creation scripts</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Guide -->
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Step-by-Step Usage Guide</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h5 class="text-primary">Step 1: Prepare Your DDL Statements</h5>
+                            <p>Gather the CREATE TABLE statements for all tables involved in your query. Include:</p>
+                            <ul>
+                                <li>Primary key definitions</li>
+                                <li>Foreign key relationships</li>
+                                <li>Column data types</li>
+                                <li>NOT NULL constraints</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 2: Identify Your Target Query</h5>
+                            <p>Choose the SELECT query you want to optimize. Best candidates include:</p>
+                            <ul>
+                                <li>Frequently executed queries</li>
+                                <li>Queries with performance issues</li>
+                                <li>Complex joins across multiple tables</li>
+                                <li>Queries with ORDER BY or GROUP BY clauses</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 3: Configure Analysis Settings</h5>
+                            <ul>
+                                <li><strong>Schema Name:</strong> Unique identifier for your analysis</li>
+                                <li><strong>Source Type:</strong> Original database platform</li>
+                                <li><strong>Target Version:</strong> PostgreSQL version (14, 15, or 16)</li>
+                            </ul>
+
+                            <h5 class="text-primary mt-4">Step 4: Run Analysis</h5>
+                            <p>The system will:</p>
+                            <ol>
+                                <li>Create temporary schema with your tables</li>
+                                <li>Generate realistic sample data</li>
+                                <li>Execute EXPLAIN ANALYZE on your query</li>
+                                <li>Identify optimization opportunities</li>
+                                <li>Test performance with recommended indexes</li>
+                            </ol>
+
+                            <h5 class="text-primary mt-4">Step 5: Review Recommendations</h5>
+                            <p>Examine the results in priority order:</p>
+                            <ul>
+                                <li><span class="badge bg-danger">HIGH</span> - Critical performance impact</li>
+                                <li><span class="badge bg-warning">MEDIUM</span> - Moderate improvement</li>
+                                <li><span class="badge bg-info">LOW</span> - Minor optimization</li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card border-secondary h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Quick Tips</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <strong>Pro Tip:</strong> Start with your slowest queries for maximum impact.
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <strong>Note:</strong> Test recommended indexes in development before production.
+                                    </div>
+                                    <div class="alert alert-success">
+                                        <strong>AWS Aurora:</strong> Includes Aurora-specific optimizations and parallel query features.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Input/Output -->
+            <div class="card border-success mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Sample Input & Expected Output</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Sample DDL Input:</h5>
+                            <pre class="bg-dark text-light p-3 rounded"><code>CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    city VARCHAR(50),
+    country VARCHAR(50),
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id INTEGER NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2),
+    status VARCHAR(20),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);</code></pre>
+
+                            <h5 class="mt-3">Sample Query Input:</h5>
+                            <pre class="bg-dark text-light p-3 rounded"><code>SELECT c.first_name, c.last_name, o.total_amount
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.city = 'New York'
+    AND o.order_date > '2024-01-01'
+    AND o.status = 'completed'
+ORDER BY o.total_amount DESC
+LIMIT 100;</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Expected Index Recommendations:</h5>
+                            <div class="card border-danger mb-2">
+                                <div class="card-body py-2">
+                                    <h6><span class="badge bg-danger">HIGH</span> BTREE Index on customers</h6>
+                                    <p class="mb-1"><strong>Columns:</strong> city</p>
+                                    <p class="mb-0"><strong>Reason:</strong> WHERE clause filter on city</p>
+                                </div>
+                            </div>
+                            <div class="card border-danger mb-2">
+                                <div class="card-body py-2">
+                                    <h6><span class="badge bg-danger">HIGH</span> BTREE Index on orders</h6>
+                                    <p class="mb-1"><strong>Columns:</strong> order_date</p>
+                                    <p class="mb-0"><strong>Reason:</strong> WHERE clause filter on order_date</p>
+                                </div>
+                            </div>
+                            <div class="card border-warning mb-2">
+                                <div class="card-body py-2">
+                                    <h6><span class="badge bg-warning">MEDIUM</span> BTREE Index on orders</h6>
+                                    <p class="mb-1"><strong>Columns:</strong> status</p>
+                                    <p class="mb-0"><strong>Reason:</strong> WHERE clause filter on status</p>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-3">Generated DDL:</h5>
+                            <pre class="bg-dark text-light p-3 rounded"><code>CREATE INDEX idx_customers_city 
+ON customers USING btree (city);
+
+CREATE INDEX idx_orders_order_date 
+ON orders USING btree (order_date);
+
+CREATE INDEX idx_orders_status 
+ON orders USING btree (status);</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Features -->
+            <div class="card border-info mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">Advanced Features & Best Practices</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Supported Query Patterns:</h5>
+                            <ul>
+                                <li><strong>Simple Filters:</strong> WHERE column = value</li>
+                                <li><strong>Range Queries:</strong> WHERE date > '2024-01-01'</li>
+                                <li><strong>Multi-table Joins:</strong> INNER, LEFT, RIGHT, FULL OUTER</li>
+                                <li><strong>Sorting Operations:</strong> ORDER BY single/multiple columns</li>
+                                <li><strong>Grouping:</strong> GROUP BY with aggregations</li>
+                                <li><strong>Subqueries:</strong> Correlated and non-correlated</li>
+                            </ul>
+
+                            <h5 class="mt-4">Index Types Recommended:</h5>
+                            <ul>
+                                <li><strong>BTREE:</strong> Default for most use cases</li>
+                                <li><strong>Composite:</strong> Multi-column indexes for complex filters</li>
+                                <li><strong>Partial:</strong> Conditional indexes for specific scenarios</li>
+                                <li><strong>Unique:</strong> For constraint enforcement</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Best Practices:</h5>
+                            <div class="alert alert-success">
+                                <h6>Implementation Order:</h6>
+                                <ol>
+                                    <li>Start with HIGH priority indexes</li>
+                                    <li>Test one index at a time</li>
+                                    <li>Measure performance impact</li>
+                                    <li>Monitor index usage with pg_stat_user_indexes</li>
+                                </ol>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6>Considerations:</h6>
+                                <ul class="mb-0">
+                                    <li>Indexes speed reads but slow writes</li>
+                                    <li>Monitor storage usage growth</li>
+                                    <li>Regular VACUUM and ANALYZE</li>
+                                    <li>Consider composite vs. multiple single indexes</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6>AWS Aurora Specific:</h6>
+                                <ul class="mb-0">
+                                    <li>Parallel query optimizations</li>
+                                    <li>Read replica considerations</li>
+                                    <li>Auto-scaling impact on indexing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="card border-secondary mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Troubleshooting Common Issues</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Common Errors & Solutions:</h5>
+                            
+                            <h6 class="text-danger">Error: "DDL content is required"</h6>
+                            <p><strong>Solution:</strong> Ensure you've pasted valid CREATE TABLE statements in the DDL field.</p>
+
+                            <h6 class="text-danger">Error: "Table creation failed"</h6>
+                            <p><strong>Solution:</strong> Check DDL syntax. Remove database-specific features not supported in PostgreSQL.</p>
+
+                            <h6 class="text-danger">Error: "Sample data generation error"</h6>
+                            <p><strong>Solution:</strong> Verify foreign key relationships are correctly defined in your DDL.</p>
+
+                            <h6 class="text-danger">Error: "Analysis timeout"</h6>
+                            <p><strong>Solution:</strong> Simplify complex queries or reduce the number of tables for initial testing.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Performance Tips:</h5>
+                            
+                            <div class="alert alert-primary">
+                                <h6>For Large Schemas:</h6>
+                                <ul class="mb-0">
+                                    <li>Start with core tables only</li>
+                                    <li>Focus on most critical queries first</li>
+                                    <li>Use representative table subsets</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-secondary">
+                                <h6>Data Type Considerations:</h6>
+                                <ul class="mb-0">
+                                    <li>Oracle NUMBER → PostgreSQL NUMERIC</li>
+                                    <li>SQL Server NVARCHAR → PostgreSQL VARCHAR</li>
+                                    <li>DATETIME → TIMESTAMP</li>
+                                    <li>Auto-converted during analysis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center">
+                <a href="{{ url_for('ddl_analysis') }}" class="btn btn-warning btn-lg">
+                    <i class="fas fa-rocket me-2"></i>
+                    Start DDL Analysis Now
+                </a>
+                <a href="{{ url_for('explain_docs') }}" class="btn btn-outline-warning btn-lg ms-3">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Learn About EXPLAIN Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
