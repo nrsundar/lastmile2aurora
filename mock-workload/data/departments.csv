@@ -1,0 +1,6 @@
+department_id,department_name,location,manager_id
+10,Engineering,New York,1
+20,Marketing,San Francisco,3
+30,Sales,Chicago,5
+40,HR,Boston,NULL
+50,Finance,Seattle,NULL
