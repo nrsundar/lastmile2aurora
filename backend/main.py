@@ -17,7 +17,7 @@ from config import settings
 from auth import get_current_user
 from db import get_pool, execute_query, init_schema
 from translator import translate_sql, analyze_explain, rewrite_slow_query, query_hash
-from oracle_mock import execute_oracle_mock
+from oracle_connector import get_oracle_executor
 from validator import deep_diff
 
 
@@ -57,7 +57,13 @@ async def _broadcast(event: dict):
 # ═══════════════════════════════════════════════════════════════════
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "lastmile2aurora"}
+    oracle = get_oracle_executor()
+    return {
+        "status": "ok",
+        "service": "lastmile2aurora",
+        "oracle_mode": "rds" if oracle.is_real else "mock",
+        "oracle_host": oracle.host or "csv_mock",
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -100,7 +106,7 @@ class ExecuteRequest(BaseModel):
 @app.post("/api/execute-compare")
 async def api_execute_compare(req: ExecuteRequest, user: dict = Depends(get_current_user)):
     # Run on Oracle mock
-    oracle_result = execute_oracle_mock(req.oracle_sql)
+    oracle_result = get_oracle_executor().execute(req.oracle_sql)
 
     # Run on Aurora PG
     start = time.monotonic()
@@ -253,7 +259,7 @@ async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_us
             translation = translate_sql(oracle_sql)
             pg_sql = translation.get("translated", oracle_sql)
 
-        oracle_result = execute_oracle_mock(oracle_sql)
+        oracle_result = get_oracle_executor().execute(oracle_sql)
         start = time.monotonic()
         try:
             pg_result = execute_query(pg_sql)

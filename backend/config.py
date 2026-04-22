@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     pg_user: str = "lastmileadmin"
     pg_password: str = ""
 
+    # Oracle (source)
+    oracle_host: str = ""
+    oracle_port: int = 1521
+    oracle_service: str = "LASTMILE"
+    oracle_user: str = "oracleadmin"
+    oracle_password: str = ""
+
     # AWS
     aws_region: str = "us-east-1"
     bedrock_model: str = "us.anthropic.claude-sonnet-4-20250514"

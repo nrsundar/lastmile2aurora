@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  LastMile2Aurora — RDS Oracle source database.
+  Epoxy compliant. Uses existing VPC from rgs-lastmile-v1 stack.
+  Owner: raghasun.
+
+Parameters:
+  StackVersion:
+    Type: String
+    Default: v1
+  OraclePassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+  ParentStackName:
+    Type: String
+    Default: rgs-lastmile-v1
+
+Resources:
+  # SG: allow Oracle port from ECS SG (same chain pattern)
+  OracleSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'rgs-lastmile Oracle - from ECS only'
+      GroupName: !Sub 'rgs-lastmile-oracle-sg-${StackVersion}'
+      VpcId: !ImportValue
+        Fn::Sub: '${ParentStackName}-VpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1521
+          ToPort: 1521
+          SourceSecurityGroupId: !ImportValue
+            Fn::Sub: '${ParentStackName}-ECSSecurityGroupId'
+
+  OracleInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub 'rgs-lastmile-oracle-${StackVersion}'
+      Engine: oracle-se2
+      EngineVersion: '19.0.0.0.ru-2026-01.rur-2026-01.r3'
+      LicenseModel: license-included
+      DBInstanceClass: db.t3.medium
+      AllocatedStorage: 20
+      MasterUsername: oracleadmin
+      MasterUserPassword: !Ref OraclePassword
+      DBName: LASTMILE
+      VPCSecurityGroups:
+        - !Ref OracleSecurityGroup
+      DBSubnetGroupName: !ImportValue
+        Fn::Sub: '${ParentStackName}-DBSubnetGroupName'
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      BackupRetentionPeriod: 7
+      MultiAZ: false
+      Tags:
+        - { Key: Owner, Value: raghasun }
+
+Outputs:
+  OracleEndpoint:
+    Description: Oracle RDS endpoint (private)
+    Value: !GetAtt OracleInstance.Endpoint.Address
+  OraclePort:
+    Value: !GetAtt OracleInstance.Endpoint.Port
