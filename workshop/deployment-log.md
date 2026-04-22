@@ -169,3 +169,25 @@ Deployment state: COMPLETED
 925712757492.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1:latest
 Digest: sha256:84be7da8a9ea0aab67c55dfd19899f034c4dd3bc07bb8ace289d775366e30633
 ```
+
+## Amplify Frontend — Deployed ✅
+```
+App ID: ddlli4hw6ltbn
+URL: https://main.ddlli4hw6ltbn.amplifyapp.com
+Status: SUCCEED
+```
+
+## Cognito Admin User — Created ✅
+```
+Email: admin@lastmile2aurora.demo
+Password: LastMile2Aurora2026!
+Group: admin
+Pool: us-east-1_TwSUGZ9Ar
+```
+
+## All Endpoints
+| Component | URL |
+|-----------|-----|
+| Frontend (Amplify) | https://main.ddlli4hw6ltbn.amplifyapp.com |
+| Backend API (ALB) | http://rgs-lastmile-alb-v1-1831853084.us-east-1.elb.amazonaws.com |
+| Aurora PG (private) | rgs-lastmile-aurora-v1.cluster-csnme3bsej9t.us-east-1.rds.amazonaws.com:5432 |
