@@ -51,18 +51,27 @@ def seed_oracle(host: str, port: int, service: str, user: str, password: str):
 
 def _load_csv_oracle(cur, table, path):
     import oracledb
+    from datetime import datetime
+    # Set date format for the session
+    cur.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'")
     with open(path) as f:
         reader = csv.DictReader(f)
         cols = reader.fieldnames
-        placeholders = ", ".join([f":{c}" for c in cols])
-        sql = f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({placeholders})"
+        # Use TO_DATE for date columns
+        date_cols = {"hire_date", "order_date"}
+        parts = []
+        for c in cols:
+            if c in date_cols:
+                parts.append(f"TO_DATE(:{c}, 'YYYY-MM-DD')")
+            else:
+                parts.append(f":{c}")
+        sql = f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(parts)})"
         for row in reader:
-            # Convert NULL strings
             cleaned = {k: (None if v == "NULL" or v == "" else v) for k, v in row.items()}
             try:
                 cur.execute(sql, cleaned)
             except oracledb.DatabaseError as e:
-                if "ORA-00001" in str(e):  # duplicate key
+                if "ORA-00001" in str(e):
                     pass
                 else:
                     raise

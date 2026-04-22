@@ -191,3 +191,19 @@ Pool: us-east-1_TwSUGZ9Ar
 | Frontend (Amplify) | https://main.ddlli4hw6ltbn.amplifyapp.com |
 | Backend API (ALB) | http://rgs-lastmile-alb-v1-1831853084.us-east-1.elb.amazonaws.com |
 | Aurora PG (private) | rgs-lastmile-aurora-v1.cluster-csnme3bsej9t.us-east-1.rds.amazonaws.com:5432 |
+
+## RDS Oracle — Available ✅
+```
+Instance: rgs-lastmile-oracle-v1
+Engine: Oracle SE2 19c
+Endpoint: rgs-lastmile-oracle-v1.csnme3bsej9t.us-east-1.rds.amazonaws.com:1521
+Service: LASTMILE
+Status: available
+```
+
+## Database Seeding — Complete ✅
+```
+Oracle seeded: employees (20 rows), departments (5 rows), orders (10 rows)
+Aurora PG seeded: employees (20 rows), departments (5 rows), orders (10 rows)
+Sequence emp_seq created (starts at 100)
+```
