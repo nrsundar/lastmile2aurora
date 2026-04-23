@@ -13,15 +13,17 @@ import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Icon from "@cloudscape-design/components/icon";
 import ExpandableSection from "@cloudscape-design/components/expandable-section";
+import Alert from "@cloudscape-design/components/alert";
 import { useAuth } from "../hooks/useAuth";
 import { useLocation } from "wouter";
 
 export default function AuthPage() {
-  const { user, login, confirm } = useAuth();
+  const { user, login, register, confirm } = useAuth();
   const [, navigate] = useLocation();
   const [tab, setTab] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,13 @@ export default function AuthPage() {
     if (!email || !password) return showError("Email and password required.");
     setLoading(true);
     try { await login(email, password); navigate("/dashboard"); } catch (e: any) { showError(e.message || "Sign in failed."); } finally { setLoading(false); }
+  };
+
+  const handleSignUp = async () => {
+    if (!email || !password || !name) return showError("All fields required.");
+    if (!email.toLowerCase().endsWith("@amazon.com")) return showError("Only @amazon.com email addresses can register.");
+    setLoading(true);
+    try { await register(email, password, name); setPendingEmail(email); setTab("confirm"); showSuccess("Account created! Check your email for a verification code."); } catch (e: any) { showError(e.message || "Sign up failed."); } finally { setLoading(false); }
   };
 
   const handleConfirm = async () => {
@@ -197,9 +206,19 @@ export default function AuthPage() {
               { id: "signin", label: "Sign In", content: (
                 <Form actions={<Button variant="primary" loading={loading} onClick={handleSignIn} fullWidth>Sign In</Button>}>
                   <SpaceBetween size="l">
-                    <FormField label="Email"><Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="you@example.com" /></FormField>
+                    <FormField label="Email"><Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="you@amazon.com" /></FormField>
                     <FormField label="Password"><Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" placeholder="Enter your password"
                       onKeyDown={({ detail }) => { if (detail.key === "Enter") handleSignIn(); }} /></FormField>
+                  </SpaceBetween>
+                </Form>
+              )},
+              { id: "signup", label: "Create Account", content: (
+                <Form actions={<Button variant="primary" loading={loading} onClick={handleSignUp} fullWidth>Create Account</Button>}>
+                  <SpaceBetween size="l">
+                    <Alert type="info">Only <b>@amazon.com</b> email addresses can register.</Alert>
+                    <FormField label="Full Name"><Input value={name} onChange={({ detail }) => setName(detail.value)} placeholder="Your Name" /></FormField>
+                    <FormField label="Email"><Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="alias@amazon.com" /></FormField>
+                    <FormField label="Password" description="Min 8 chars, uppercase, lowercase, number"><Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" /></FormField>
                   </SpaceBetween>
                 </Form>
               )},
