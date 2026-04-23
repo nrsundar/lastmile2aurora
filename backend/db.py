@@ -110,5 +110,19 @@ def init_schema():
                 );
             """)
         conn.commit()
+
+        # Add columns if missing (for existing tables)
+        with conn.cursor() as cur:
+            for stmt in [
+                "ALTER TABLE lm_performance_snapshots ADD COLUMN IF NOT EXISTS run_id VARCHAR(100) DEFAULT ''",
+                "ALTER TABLE lm_performance_snapshots ADD COLUMN IF NOT EXISTS user_sub VARCHAR(100) DEFAULT ''",
+                "ALTER TABLE lm_alerts ADD COLUMN IF NOT EXISTS run_id VARCHAR(100) DEFAULT ''",
+                "ALTER TABLE lm_alerts ADD COLUMN IF NOT EXISTS user_sub VARCHAR(100) DEFAULT ''",
+            ]:
+                try:
+                    cur.execute(stmt)
+                except Exception:
+                    pass
+        conn.commit()
     finally:
         get_pool().putconn(conn)
