@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LastMile2Aurora — Presentation</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; overflow: hidden; }
+.slide { display: none; width: 100vw; height: 100vh; padding: 60px 80px; position: relative; }
+.slide.active { display: flex; flex-direction: column; }
+.slide-num { position: absolute; bottom: 20px; right: 40px; color: #475569; font-size: 14px; }
+.progress { position: absolute; bottom: 0; left: 0; height: 4px; background: linear-gradient(90deg, #0972d3, #4ade80); transition: width 0.3s; }
+h1 { font-size: 48px; font-weight: 900; margin-bottom: 16px; }
+h2 { font-size: 36px; font-weight: 700; margin-bottom: 24px; color: #38bdf8; }
+h3 { font-size: 24px; font-weight: 600; margin-bottom: 12px; color: #94a3b8; }
+p, li { font-size: 22px; line-height: 1.6; color: #cbd5e1; }
+ul { padding-left: 30px; }
+li { margin-bottom: 8px; }
+.highlight { color: #4ade80; font-weight: 700; }
+.warn { color: #fbbf24; }
+.error { color: #f87171; }
+.blue { color: #38bdf8; }
+.gradient-text { background: linear-gradient(135deg, #0972d3, #44b9d6, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.tagline { font-size: 28px; color: #94a3b8; margin-bottom: 40px; line-height: 1.4; }
+.cols { display: flex; gap: 40px; flex: 1; }
+.col { flex: 1; }
+.card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 16px; border-left: 4px solid #0972d3; }
+.card.orange { border-left-color: #f59e0b; }
+.card.green { border-left-color: #4ade80; }
+.card.red { border-left-color: #f87171; }
+.card h3 { color: #e2e8f0; margin-bottom: 8px; }
+.card p { font-size: 18px; }
+code { background: #1e293b; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #4ade80; }
+pre { background: #1e293b; padding: 20px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 16px; line-height: 1.5; overflow-x: auto; color: #94a3b8; }
+.stat-row { display: flex; gap: 24px; margin: 24px 0; }
+.stat { flex: 1; text-align: center; background: #1e293b; border-radius: 12px; padding: 24px; }
+.stat .num { font-size: 48px; font-weight: 900; }
+.stat .label { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 18px; }
+th { text-align: left; padding: 12px 16px; border-bottom: 2px solid #334155; color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1e293b; }
+.center { display: flex; align-items: center; justify-content: center; flex: 1; }
+.demo-box { background: linear-gradient(135deg, #0972d3, #0e7490); border-radius: 16px; padding: 40px; text-align: center; }
+.demo-box h2 { color: white; }
+.demo-box p { color: #bae6fd; font-size: 24px; }
+.nav-hint { position: absolute; bottom: 20px; left: 40px; color: #334155; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<div class="slide" id="s1">
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+    <h1 class="gradient-text" style="font-size:64px;">LastMile2Aurora</h1>
+    <p class="tagline">Validate that your migrated queries perform the same on Aurora PostgreSQL as they did on Oracle — and if they don't, <span class="highlight">fix them with AI</span>.</p>
+    <p style="color:#64748b; font-size:18px;">48-Hour Hackathon Project &nbsp;|&nbsp; raghasun@ &nbsp;|&nbsp; April 2026</p>
+  </div>
+</div>
+
+<!-- Slide 2: The Problem -->
+<div class="slide" id="s2">
+  <h2>The Problem</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card green">
+        <h3>What SCT Does Well ✅</h3>
+        <p>Schema migration — DDL, tables, indexes, constraints, views</p>
+      </div>
+      <div class="card red">
+        <h3>What's Left Behind ❌</h3>
+        <p>Application-layer SQL — DML queries embedded in code. Discovered broken or slow <span class="error">in production after cutover</span>.</p>
+      </div>
+      <div class="card orange">
+        <h3>Common Issues</h3>
+        <ul>
+          <li>Oracle syntax fails on PG (NVL, ROWNUM, DECODE)</li>
+          <li>Queries fast on Oracle, slow on Aurora PG</li>
+          <li>Test data ≠ production volume → false comparisons</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col" style="display:flex; align-items:center;">
+      <div style="background:#1e293b; border-radius:12px; padding:32px; text-align:center; width:100%;">
+        <p style="font-size:64px; margin-bottom:16px;">😱</p>
+        <p style="font-size:20px; color:#f87171; font-weight:bold;">"We delayed cutover by 3 weeks because queries were breaking in production."</p>
+        <p style="color:#64748b; margin-top:12px;">— Every Oracle migration customer</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Solution -->
+<div class="slide" id="s3">
+  <h2>What LastMile2Aurora Does</h2>
+  <div class="stat-row">
+    <div class="stat" style="border-top:4px solid #0972d3;">
+      <div style="font-size:36px; margin-bottom:8px;">🏷️</div>
+      <div class="num blue">Tag & Track</div>
+      <p style="font-size:16px; margin-top:8px;">Tag business-critical queries with SQL comments. Match across Oracle and PG by tag, not SQL hash.</p>
+    </div>
+    <div class="stat" style="border-top:4px solid #f59e0b;">
+      <div style="font-size:36px; margin-bottom:8px;">📊</div>
+      <div class="num warn">Compare</div>
+      <p style="font-size:16px; margin-top:8px;">Oracle data blocks vs PG pages. Execution time, row counts, data correctness. Flag regressions.</p>
+    </div>
+    <div class="stat" style="border-top:4px solid #4ade80;">
+      <div style="font-size:36px; margin-bottom:8px;">🤖</div>
+      <div class="num highlight">AI Fix</div>
+      <p style="font-size:16px; margin-top:8px;">Amazon Bedrock (Claude) analyzes the plan and rewrites the query. Human-in-the-loop or autonomous.</p>
+    </div>
+  </div>
+  <div style="background:#1e293b; border-radius:8px; padding:16px; margin-top:16px;">
+    <p style="text-align:center; font-size:18px; color:#94a3b8;">Oracle EE 19c → <span class="highlight">LastMile2Aurora</span> → Aurora PostgreSQL 16 &nbsp;|&nbsp; 15 Oracle quirks handled &nbsp;|&nbsp; Powered by Amazon Bedrock</p>
+  </div>
+</div>
+
+<!-- Slide 4: Why Tags -->
+<div class="slide" id="s4">
+  <h2>Why Tags?</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>The Matching Problem</h3>
+      <p style="margin-bottom:16px;">Same business query → different SQL syntax → <span class="error">different hash</span></p>
+      <pre style="border-left:4px solid #f59e0b;">
+<span style="color:#f59e0b;">-- Oracle</span>
+SELECT <span style="color:#4ade80;">/* tag:order_lookup */</span>
+  o.order_id, NVL(o.amount, 0)
+FROM orders o
+WHERE ROWNUM <= 100</pre>
+      <br>
+      <pre style="border-left:4px solid #0972d3;">
+<span style="color:#0972d3;">-- PostgreSQL</span>
+SELECT <span style="color:#4ade80;">/* tag:order_lookup */</span>
+  o.order_id, COALESCE(o.amount, 0)
+FROM orders o
+LIMIT 100</pre>
+    </div>
+    <div class="col">
+      <h3 style="margin-top:0;">Same Tag = Same Query</h3>
+      <div class="card green" style="margin-top:16px;">
+        <h3>How It Works</h3>
+        <ul>
+          <li>Customer tags top 50-100 critical queries</li>
+          <li>Same tag in Oracle and PG code</li>
+          <li>Tool reads V$SQL + pg_stat_statements</li>
+          <li>Matches by tag, compares performance</li>
+        </ul>
+      </div>
+      <div class="card orange">
+        <h3>Data Volume Warning</h3>
+        <p>If Oracle has 10M rows and PG has 100K, plans will differ. <span class="warn">That's not a regression — it's a test data issue.</span> We flag this.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Architecture -->
+<div class="slide" id="s5">
+  <h2>Architecture</h2>
+  <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+    <pre style="font-size:15px; line-height:1.8; background:transparent; color:#94a3b8;">
+┌──────────────────┐
+│ <span class="blue">Customer App</span>     │  Tagged SQL: /* tag:order_lookup */
+│ or <span class="warn">HammerDB</span>      │  Small / Medium / Large profiles
+└──┬───────────┬───┘
+   │           │
+   ▼           ▼
+<span style="color:#f59e0b;">┌──────────┐</span> <span style="color:#0972d3;">┌──────────────┐</span>
+<span style="color:#f59e0b;">│ Oracle   │</span> <span style="color:#0972d3;">│ Aurora PG 16 │</span>
+<span style="color:#f59e0b;">│ EE 19c   │</span> <span style="color:#0972d3;">│ (target)     │</span>     All in <span class="highlight">private subnets</span>
+<span style="color:#f59e0b;">└──┬───────┘</span> <span style="color:#0972d3;">└──────┬───────┘</span>     KMS CMK encrypted
+   │                │              Epoxy/Orthanc compliant
+   └──────┬─────────┘
+          ▼
+<span style="color:#4ade80;">┌─────────────────────┐</span>
+<span style="color:#4ade80;">│ LastMile2Aurora      │</span>  ECS Fargate + CloudFront HTTPS
+<span style="color:#4ade80;">│ • Tag Matcher        │</span>  Cognito Auth (MFA, @amazon.com only)
+<span style="color:#4ade80;">│ • Deep Diff          │</span>  Multi-user isolation (run_id)
+<span style="color:#4ade80;">│ • Perf Compare       │</span>  ──→  <span class="blue">React + Cloudscape Dashboard</span>
+<span style="color:#4ade80;">│ • LLM Rewrite        │</span>
+<span style="color:#4ade80;">└─────────────────────┘</span>
+    </pre>
+  </div>
+</div>
+
+<!-- Slide 6: Metrics -->
+<div class="slide" id="s6">
+  <h2>Performance Metrics Compared</h2>
+  <table style="margin-top:24px;">
+    <tr><th>Metric</th><th style="color:#f59e0b;">Oracle Source</th><th style="color:#0972d3;">Aurora PG Target</th></tr>
+    <tr><td><strong>I/O</strong></td><td>Data Blocks Read (V$SQL.disk_reads)</td><td>Pages Read (shared_blks_read)</td></tr>
+    <tr><td><strong>Execution Time</strong></td><td>V$SQL.elapsed_time</td><td>pg_stat.total_exec_time</td></tr>
+    <tr><td><strong>Rows</strong></td><td>rows_processed</td><td>rows returned</td></tr>
+    <tr><td><strong>Executions</strong></td><td>executions</td><td>calls</td></tr>
+    <tr><td><strong>Data Volume</strong></td><td colspan="2"><span class="warn">⚠️ Mismatch = likely different test data, not a real regression</span></td></tr>
+  </table>
+  <div style="margin-top:32px;">
+    <h3>15 Oracle Quirks Auto-Detected</h3>
+    <p style="font-size:18px; line-height:2;">
+      <code>SYSDATE</code> <code>NVL</code> <code>ROWNUM</code> <code>DUAL</code> <code>DECODE</code> <code>(+) joins</code> <code>.NEXTVAL</code> <code>CONNECT BY</code> <code>MERGE</code> <code>TO_CHAR/TO_DATE</code> <code>TRUNC</code> <code>SUBSTR</code> <code>|| concat</code> <code>CLOB/BLOB</code> <code>Hints</code>
+    </p>
+  </div>
+</div>
+
+<!-- Slide 7: Live Demo -->
+<div class="slide" id="s7">
+  <div class="center">
+    <div class="demo-box" style="width:80%;">
+      <h2 style="font-size:48px; margin-bottom:16px;">🎯 Live Demo</h2>
+      <p style="margin-bottom:24px;">https://main.ddlli4hw6ltbn.amplifyapp.com</p>
+      <div style="display:flex; gap:24px; justify-content:center; margin-top:24px;">
+        <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:16px 24px;">
+          <p style="font-size:16px; color:#bae6fd;">1. Sign In</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:16px 24px;">
+          <p style="font-size:16px; color:#bae6fd;">2. Demo Mode</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:16px 24px;">
+          <p style="font-size:16px; color:#bae6fd;">3. Run Workload</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:16px 24px;">
+          <p style="font-size:16px; color:#bae6fd;">4. Translate SQL</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:16px 24px;">
+          <p style="font-size:16px; color:#bae6fd;">5. Reports</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Real World -->
+<div class="slide" id="s8">
+  <h2>Real-World Customer Workflow</h2>
+  <div class="cols">
+    <div class="col">
+      <div style="counter-reset:step;">
+        <div class="card" style="border-left-color:#0972d3;"><h3>1. Tag Queries</h3><p>Customer adds <code>/* tag:name */</code> to top 50-100 critical queries in app code</p></div>
+        <div class="card" style="border-left-color:#0e7490;"><h3>2. Connect Databases</h3><p>Enter Oracle source + Aurora PG target connection strings</p></div>
+        <div class="card" style="border-left-color:#0891b2;"><h3>3. Run Workload</h3><p>Use real app traffic or HammerDB (Small / Medium / Large)</p></div>
+        <div class="card" style="border-left-color:#06b6d4;"><h3>4. Monitor & Fix</h3><p>Dashboard shows live comparison. AI fixes regressions.</p></div>
+        <div class="card green"><h3>5. Export Report</h3><p>Cutover readiness proof for the team</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Workload Profiles</h3>
+      <table style="margin-top:16px;">
+        <tr><th>Profile</th><th>Duration</th><th>VUs</th><th>Use Case</th></tr>
+        <tr><td>🟢 Small</td><td>6 min</td><td>2</td><td>Quick demo</td></tr>
+        <tr><td>🟡 Medium</td><td>30 min</td><td>4</td><td>Workshop</td></tr>
+        <tr><td>🔴 Large</td><td>60 min</td><td>8</td><td>Production sim</td></tr>
+      </table>
+      <h3 style="margin-top:32px;">Future Roadmap</h3>
+      <ul>
+        <li>SQL Server → Aurora PG support</li>
+        <li>AWR report import</li>
+        <li>Live V$SQL capture</li>
+        <li>Custom DB connections in UI</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: Security -->
+<div class="slide" id="s9">
+  <h2>Security & Compliance</h2>
+  <p style="margin-bottom:24px;">Fully <span class="highlight">Epoxy/Orthanc compliant</span> — zero findings</p>
+  <div class="cols">
+    <div class="col">
+      <table>
+        <tr><th>Control</th><th>Status</th></tr>
+        <tr><td>RDS not publicly accessible</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>Private subnets (compute + DB)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>KMS CMK encryption (Aurora, S3, ECR)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>SG chaining (CF→ALB→ECS→DB)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>ALB restricted to CloudFront IPs</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>Cognito MFA (optional TOTP)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>Self-reg: @amazon.com only</td><td><span class="highlight">✅</span></td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <table>
+        <tr><th>Control</th><th>Status</th></tr>
+        <tr><td>JWT verification on all APIs</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>S3 hardened (versioned, no public)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>ECR scan on push</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>CloudWatch logs (14d retention)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>HTTPS everywhere (CloudFront)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>Multi-user isolation (run_id)</td><td><span class="highlight">✅</span></td></tr>
+        <tr><td>No hardcoded secrets</td><td><span class="highlight">✅</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: What I Built -->
+<div class="slide" id="s10">
+  <h2>What I Built in 48 Hours</h2>
+  <div class="stat-row">
+    <div class="stat"><div class="num highlight">~3,000</div><div class="label">Lines of Code</div></div>
+    <div class="stat"><div class="num blue">7</div><div class="label">API Endpoints</div></div>
+    <div class="stat"><div class="num warn">15</div><div class="label">Oracle Quirks</div></div>
+    <div class="stat"><div class="num" style="color:#a78bfa;">5</div><div class="label">CloudFormation Stacks</div></div>
+  </div>
+  <div class="cols" style="margin-top:16px;">
+    <div class="col">
+      <div class="card"><h3>Frontend</h3><p>React 18 + Cloudscape + Vite<br>Amplify + CloudFront (HTTPS)</p></div>
+      <div class="card"><h3>Backend</h3><p>Python FastAPI + Uvicorn<br>ECS Fargate + ALB</p></div>
+      <div class="card"><h3>AI</h3><p>Amazon Bedrock (Claude)<br>sql-migration-optimizer engine</p></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Databases</h3><p>Oracle EE 19c + Aurora PG 16<br>Both private, KMS encrypted</p></div>
+      <div class="card"><h3>Load Gen</h3><p>HammerDB 4.x (TPC-C)<br>EC2 in private subnet, SSM only</p></div>
+      <div class="card"><h3>Auth</h3><p>Cognito + Lambda pre-sign-up<br>@amazon.com restriction</p></div>
+    </div>
+  </div>
+  <p style="text-align:center; margin-top:16px; color:#64748b;">Built with <span class="blue">Kiro</span> in AgentSpaces — powered by Claude</p>
+</div>
+
+<!-- Slide 11: Q&A -->
+<div class="slide" id="s11">
+  <div class="center">
+    <div style="text-align:center;">
+      <h1 class="gradient-text" style="font-size:56px; margin-bottom:32px;">Thank You</h1>
+      <div style="display:flex; gap:40px; justify-content:center; margin-bottom:40px;">
+        <div class="stat" style="min-width:280px;">
+          <div class="label">Try It</div>
+          <p style="font-size:16px; margin-top:8px; color:#38bdf8;">https://main.ddlli4hw6ltbn.amplifyapp.com</p>
+        </div>
+        <div class="stat" style="min-width:280px;">
+          <div class="label">Code</div>
+          <p style="font-size:16px; margin-top:8px; color:#38bdf8;">gitlab.aws.dev/raghasun/lastmile2aurora</p>
+        </div>
+      </div>
+      <h2 style="color:#e2e8f0;">Questions?</h2>
+    </div>
+  </div>
+</div>
+
+<div class="nav-hint">← → Arrow keys to navigate &nbsp;|&nbsp; Press F for fullscreen</div>
+<div class="progress" id="progress"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const total = slides.length;
+
+function show(n) {
+  slides.forEach(s => s.classList.remove('active'));
+  current = Math.max(0, Math.min(n, total - 1));
+  slides[current].classList.add('active');
+  // Add slide number
+  slides[current].querySelectorAll('.slide-num').forEach(e => e.remove());
+  const num = document.createElement('div');
+  num.className = 'slide-num';
+  num.textContent = `${current + 1} / ${total}`;
+  slides[current].appendChild(num);
+  document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+  if (e.key === 'f' || e.key === 'F') { document.documentElement.requestFullscreen?.(); }
+  if (e.key === 'Escape') { document.exitFullscreen?.(); }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.clientX > window.innerWidth / 2) show(current + 1);
+  else show(current - 1);
+});
+
+show(0);
+</script>
+</body>
+</html>
