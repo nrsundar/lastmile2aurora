@@ -12,6 +12,7 @@ import Tabs from "@cloudscape-design/components/tabs";
 import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Icon from "@cloudscape-design/components/icon";
+import ExpandableSection from "@cloudscape-design/components/expandable-section";
 import { useAuth } from "../hooks/useAuth";
 import { useLocation } from "wouter";
 
@@ -27,11 +28,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [flash, setFlash] = useState<FlashbarProps.MessageDefinition[]>([]);
 
-  // Already logged in → navigate (no window.location)
-  if (user) {
-    navigate("/dashboard");
-    return null;
-  }
+  if (user) { navigate("/dashboard"); return null; }
 
   const showError = (msg: string) => setFlash([{ type: "error", content: msg, dismissible: true, onDismiss: () => setFlash([]) }]);
   const showSuccess = (msg: string) => setFlash([{ type: "success", content: msg, dismissible: true, onDismiss: () => setFlash([]) }]);
@@ -39,20 +36,7 @@ export default function AuthPage() {
   const handleSignIn = async () => {
     if (!email || !password) return showError("Email and password required.");
     setLoading(true);
-    try {
-      await login(email, password);
-      navigate("/dashboard");
-    } catch (e: any) {
-      showError(e.message || "Sign in failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (!email || !password || !name) return showError("All fields required.");
-    setLoading(true);
-    try { await register(email, password, name); setPendingEmail(email); setTab("confirm"); showSuccess("Check your email for a verification code."); } catch (e: any) { showError(e.message); } finally { setLoading(false); }
+    try { await login(email, password); navigate("/dashboard"); } catch (e: any) { showError(e.message || "Sign in failed."); } finally { setLoading(false); }
   };
 
   const handleConfirm = async () => {
@@ -62,13 +46,12 @@ export default function AuthPage() {
   };
 
   return (
-    <ContentLayout
-      header={
-        <Box padding={{ top: "l", bottom: "l" }} textAlign="center">
-          <SpaceBetween size="xs">
-            <div style={{ fontSize: "36px", fontWeight: 900, background: "linear-gradient(135deg, #0972d3 0%, #44b9d6 50%, #1b9e77 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              LastMile2Aurora
-            </div>
+    <ContentLayout header={<Box padding={{ top: "l" }} />}>
+      <SpaceBetween size="xl">
+        {/* Hero */}
+        <Box textAlign="center" padding={{ bottom: "s" }}>
+          <SpaceBetween size="xxs">
+            <Box variant="h1" fontSize="display-l" fontWeight="bold" color="text-status-info">LastMile2Aurora</Box>
             <Box variant="p" fontSize="heading-l" color="text-body-secondary">
               AWS SCT migrates your schema. <b>This tool migrates your code.</b>
             </Box>
@@ -77,11 +60,10 @@ export default function AuthPage() {
             </Box>
           </SpaceBetween>
         </Box>
-      }
-    >
-      <SpaceBetween size="xl">
+
+        {/* Feature cards */}
         <ColumnLayout columns={3}>
-          <div style={{ background: "linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #d1e5f0" }}>
+          <div style={{ background: "linear-gradient(180deg, #f0f9ff 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #d1e5f0" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #0972d3, #44b9d6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="search" variant="inverted" size="medium" />
@@ -90,7 +72,7 @@ export default function AuthPage() {
               <Box color="text-body-secondary">Queries execute against both Oracle and Aurora PostgreSQL simultaneously. Every result compared cell-by-cell in real-time.</Box>
             </SpaceBetween>
           </div>
-          <div style={{ background: "linear-gradient(180deg, #fff8f0 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #f0d9b5" }}>
+          <div style={{ background: "linear-gradient(180deg, #fff8f0 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #f0d9b5" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #d97706, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="status-warning" variant="inverted" size="medium" />
@@ -99,7 +81,7 @@ export default function AuthPage() {
               <Box color="text-body-secondary">Catches row count mismatches, schema drift, data differences, and performance regressions (&gt;20% slower) instantly.</Box>
             </SpaceBetween>
           </div>
-          <div style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #bbf7d0" }}>
+          <div style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #bbf7d0" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #16a34a, #4ade80)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="gen-ai" variant="inverted" size="medium" />
@@ -110,7 +92,8 @@ export default function AuthPage() {
           </div>
         </ColumnLayout>
 
-        <div style={{ background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)", borderRadius: "12px", padding: "20px 32px", color: "white" }}>
+        {/* Oracle quirks banner */}
+        <div style={{ background: "linear-gradient(135deg, #1e293b, #334155)", borderRadius: "12px", padding: "20px 32px", color: "white" }}>
           <ColumnLayout columns={2}>
             <Box>
               <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Oracle Quirks Handled</div>
@@ -120,27 +103,108 @@ export default function AuthPage() {
             </Box>
             <Box textAlign="right">
               <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Powered By</div>
-              <div style={{ color: "white", fontSize: "14px", marginTop: "8px" }}>Amazon Bedrock (Claude) • Aurora PostgreSQL 16 • Oracle SE2 19c</div>
+              <div style={{ color: "white", fontSize: "14px", marginTop: "8px" }}>Amazon Bedrock (Claude) • Aurora PostgreSQL 16 • Oracle EE 19c • HammerDB TPC-C</div>
             </Box>
           </ColumnLayout>
         </div>
 
+        {/* How It Works in Production */}
+        <ExpandableSection headerText="How It Works in Production — For SAs" variant="container" defaultExpanded>
+          <SpaceBetween size="l">
+            <Box variant="p" color="text-body-secondary">
+              LastMile2Aurora is designed for Solutions Architects running real Oracle → Aurora PostgreSQL migrations. Here's the production workflow:
+            </Box>
+
+            <ColumnLayout columns={2}>
+              <SpaceBetween size="m">
+                <Box variant="h4">SA Workflow</Box>
+                <div style={{ fontFamily: "monospace", fontSize: "13px", background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0", lineHeight: "2" }}>
+                  <b>1.</b> Connect to customer's Oracle RDS + Aurora PG target<br/>
+                  <b>2.</b> Run HammerDB TPC-C workload (Small / Medium / Large)<br/>
+                  <b>3.</b> Dashboard shows live query comparison in real-time<br/>
+                  <b>4.</b> Identify regressions — queries slower on Aurora PG<br/>
+                  <b>5.</b> Click Auto-Remediate — LLM rewrites the slow query<br/>
+                  <b>6.</b> Export report — send to customer as cutover readiness proof
+                </div>
+
+                <Box variant="h4">Workload Profiles</Box>
+                <div style={{ fontFamily: "monospace", fontSize: "13px", background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead><tr style={{ borderBottom: "2px solid #e2e8f0" }}>
+                      <th style={{ textAlign: "left", padding: "4px 8px" }}>Profile</th>
+                      <th style={{ textAlign: "left", padding: "4px 8px" }}>Duration</th>
+                      <th style={{ textAlign: "left", padding: "4px 8px" }}>Virtual Users</th>
+                      <th style={{ textAlign: "left", padding: "4px 8px" }}>Use Case</th>
+                    </tr></thead>
+                    <tbody>
+                      <tr><td style={{ padding: "4px 8px" }}>🟢 Small</td><td style={{ padding: "4px 8px" }}>6 min</td><td style={{ padding: "4px 8px" }}>2</td><td style={{ padding: "4px 8px" }}>Quick demo</td></tr>
+                      <tr><td style={{ padding: "4px 8px" }}>🟡 Medium</td><td style={{ padding: "4px 8px" }}>30 min</td><td style={{ padding: "4px 8px" }}>4</td><td style={{ padding: "4px 8px" }}>Workshop / POC</td></tr>
+                      <tr><td style={{ padding: "4px 8px" }}>🔴 Large</td><td style={{ padding: "4px 8px" }}>60 min</td><td style={{ padding: "4px 8px" }}>8</td><td style={{ padding: "4px 8px" }}>Production simulation</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </SpaceBetween>
+
+              <SpaceBetween size="m">
+                <Box variant="h4">Architecture</Box>
+                <div style={{ fontFamily: "monospace", fontSize: "12px", background: "#0f172a", color: "#94a3b8", padding: "16px", borderRadius: "8px", lineHeight: "1.6", whiteSpace: "pre" }}>
+{`┌──────────────┐
+│  HammerDB    │ TPC-C OLTP workload
+│  (EC2)       │ Small / Medium / Large
+└──┬───────┬───┘
+   │       │
+   ▼       ▼
+┌──────┐ ┌──────────┐
+│Oracle│ │Aurora PG  │
+│EE 19c│ │16 (target)│
+└──┬───┘ └────┬─────┘
+   │          │
+   └────┬─────┘
+        ▼
+┌───────────────┐
+│LastMile2Aurora │
+│• Compare      │→ Dashboard
+│• Detect       │→ Alerts
+│• Auto-fix     │→ LLM Rewrite
+└───────────────┘`}
+                </div>
+
+                <Box variant="h4">Real-World Value</Box>
+                <SpaceBetween size="xxs">
+                  <Box>✓ <b>Before cutover:</b> Prove every query works on Aurora PG</Box>
+                  <Box>✓ <b>During parallel run:</b> Monitor live traffic on both databases</Box>
+                  <Box>✓ <b>Performance proof:</b> Side-by-side latency comparison</Box>
+                  <Box>✓ <b>Auto-remediation:</b> LLM fixes Oracle-specific SQL patterns</Box>
+                  <Box>✓ <b>Customer confidence:</b> Exportable report for cutover approval</Box>
+                </SpaceBetween>
+
+                <Box variant="h4">Supported Sources</Box>
+                <SpaceBetween size="xxs">
+                  <Box>✓ Oracle EE 19c (RDS or on-premises)</Box>
+                  <Box>✓ SQL Server (coming soon)</Box>
+                  <Box>→ Target: Aurora PostgreSQL 14/15/16</Box>
+                </SpaceBetween>
+              </SpaceBetween>
+            </ColumnLayout>
+          </SpaceBetween>
+        </ExpandableSection>
+
+        {/* Auth form */}
         <Flashbar items={flash} />
         <ColumnLayout columns={2}>
-          <div style={{ padding: "32px 0" }}>
-            <SpaceBetween size="l">
-              <Box variant="h2">Get Started</Box>
-              <Box color="text-body-secondary" fontSize="heading-s">
-                Sign in to access the live migration dashboard. Run demo workloads, translate Oracle SQL, and validate results.
-              </Box>
-              <SpaceBetween size="xs">
-                <Box><b>✓</b> 16 pre-built Oracle demo queries</Box>
-                <Box><b>✓</b> Real Oracle RDS + Aurora PostgreSQL</Box>
-                <Box><b>✓</b> Deep diff: row count, schema, cell-by-cell</Box>
-                <Box><b>✓</b> LLM auto-remediation via Bedrock</Box>
-              </SpaceBetween>
+          <SpaceBetween size="l">
+            <Box variant="h2">Get Started</Box>
+            <Box color="text-body-secondary" fontSize="heading-s">
+              Sign in to access the live migration dashboard. Run demo workloads, translate Oracle SQL, and validate results.
+            </Box>
+            <SpaceBetween size="xxs">
+              <Box>✓ 16 pre-built Oracle demo queries</Box>
+              <Box>✓ Real Oracle EE 19c + Aurora PostgreSQL 16</Box>
+              <Box>✓ HammerDB TPC-C load generator</Box>
+              <Box>✓ Deep diff: row count, schema, cell-by-cell</Box>
+              <Box>✓ LLM auto-remediation via Amazon Bedrock</Box>
             </SpaceBetween>
-          </div>
+          </SpaceBetween>
           <Container>
             <Tabs activeTabId={tab} onChange={({ detail }) => setTab(detail.activeTabId)} tabs={[
               { id: "signin", label: "Sign In", content: (

@@ -1,0 +1,173 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  LastMile2Aurora — HammerDB Load Generator EC2.
+  Epoxy compliant: private subnet, SSM only, no public IP.
+  Owner: raghasun.
+
+Parameters:
+  StackVersion:
+    Type: String
+    Default: v1
+  VpcId:
+    Type: String
+    Description: VPC ID from main stack
+  PrivateSubnetId:
+    Type: String
+    Description: Private subnet for EC2
+  OracleSecurityGroupId:
+    Type: String
+    Description: Oracle RDS security group ID
+  DBSecurityGroupId:
+    Type: String
+    Description: Aurora PG security group ID
+  OracleHost:
+    Type: String
+    Description: Oracle EE RDS endpoint
+  OraclePassword:
+    Type: String
+    NoEcho: true
+  PGHost:
+    Type: String
+    Description: Aurora PG endpoint
+  PGPassword:
+    Type: String
+    NoEcho: true
+
+Resources:
+  # ── Security Group: HammerDB EC2 ──
+  HammerDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'rgs-lastmile HammerDB - outbound to Oracle + Aurora only'
+      GroupName: !Sub 'rgs-lastmile-hammerdb-sg-${StackVersion}'
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 1521
+          ToPort: 1521
+          DestinationSecurityGroupId: !Ref OracleSecurityGroupId
+          Description: Oracle RDS
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          DestinationSecurityGroupId: !Ref DBSecurityGroupId
+          Description: Aurora PG
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS for SSM agent and package installs
+      Tags:
+        - { Key: Owner, Value: raghasun }
+
+  # Allow HammerDB → Oracle inbound
+  OracleIngressFromHammerDB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref OracleSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 1521
+      ToPort: 1521
+      SourceSecurityGroupId: !Ref HammerDBSecurityGroup
+      Description: HammerDB load generator
+
+  # Allow HammerDB → Aurora PG inbound
+  DBIngressFromHammerDB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DBSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId: !Ref HammerDBSecurityGroup
+      Description: HammerDB load generator
+
+  # ── IAM Role: SSM only ──
+  HammerDBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'rgs-lastmile-hammerdb-role-${StackVersion}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+      Tags:
+        - { Key: Owner, Value: raghasun }
+
+  HammerDBInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub 'rgs-lastmile-hammerdb-profile-${StackVersion}'
+      Roles:
+        - !Ref HammerDBRole
+
+  # ── EC2 Instance ──
+  HammerDBInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.xlarge
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+      SubnetId: !Ref PrivateSubnetId
+      SecurityGroupIds:
+        - !Ref HammerDBSecurityGroup
+      IamInstanceProfile: !Ref HammerDBInstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            Encrypted: true
+      Tags:
+        - { Key: Name, Value: !Sub 'rgs-lastmile-hammerdb-${StackVersion}' }
+        - { Key: Owner, Value: raghasun }
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          exec > /var/log/hammerdb-setup.log 2>&1
+
+          # Update system
+          dnf update -y
+          dnf install -y postgresql16 java-17-amazon-corretto unzip wget
+
+          # Install Oracle Instant Client
+          cd /tmp
+          wget -q https://download.oracle.com/otn_software/linux/instantclient/2340000/instantclient-basic-linux.x64-23.4.0.24.05.zip
+          unzip -q instantclient-basic-linux.x64-23.4.0.24.05.zip -d /opt/oracle
+          echo '/opt/oracle/instantclient_23_4' > /etc/ld.so.conf.d/oracle.conf
+          ldconfig
+          export LD_LIBRARY_PATH=/opt/oracle/instantclient_23_4:$LD_LIBRARY_PATH
+          echo 'export LD_LIBRARY_PATH=/opt/oracle/instantclient_23_4:$LD_LIBRARY_PATH' >> /etc/profile.d/oracle.sh
+
+          # Install HammerDB
+          cd /opt
+          wget -q https://github.com/TPC-Council/HammerDB/releases/download/v4.10/HammerDB-4.10-Linux.tar.gz
+          tar xzf HammerDB-4.10-Linux.tar.gz
+          ln -s /opt/HammerDB-4.10 /opt/hammerdb
+
+          # Create config directory
+          mkdir -p /opt/hammerdb/scripts
+          cat > /opt/hammerdb/scripts/env.sh << 'ENVEOF'
+          export ORACLE_HOST="${OracleHost}"
+          export ORACLE_PORT=1521
+          export ORACLE_SERVICE="LASTMILE"
+          export ORACLE_USER="oracleadmin"
+          export ORACLE_PASSWORD="${OraclePassword}"
+          export PG_HOST="${PGHost}"
+          export PG_PORT=5432
+          export PG_DATABASE="lastmile"
+          export PG_USER="lastmileadmin"
+          export PG_PASSWORD="${PGPassword}"
+          ENVEOF
+
+          echo "HammerDB setup complete"
+
+Outputs:
+  HammerDBInstanceId:
+    Value: !Ref HammerDBInstance
+  HammerDBSecurityGroupId:
+    Value: !Ref HammerDBSecurityGroup
