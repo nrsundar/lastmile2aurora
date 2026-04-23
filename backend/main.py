@@ -37,7 +37,12 @@ app = FastAPI(title="LastMile2Aurora", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tightened in production via env var
+    allow_origins=[
+        "https://d34mk9xz6qdqt7.cloudfront.net",
+        "https://main.ddlli4hw6ltbn.amplifyapp.com",
+        "http://localhost:5173",
+        "*",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -13,9 +13,11 @@ import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Icon from "@cloudscape-design/components/icon";
 import { useAuth } from "../hooks/useAuth";
+import { useLocation } from "wouter";
 
 export default function AuthPage() {
   const { user, login, register, confirm } = useAuth();
+  const [, navigate] = useLocation();
   const [tab, setTab] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,10 +27,10 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [flash, setFlash] = useState<FlashbarProps.MessageDefinition[]>([]);
 
-  // Already logged in → hard redirect
+  // Already logged in → navigate (no window.location)
   if (user) {
-    window.location.href = "/dashboard";
-    return <Box textAlign="center" padding="xxl"><b>Redirecting to dashboard...</b></Box>;
+    navigate("/dashboard");
+    return null;
   }
 
   const showError = (msg: string) => setFlash([{ type: "error", content: msg, dismissible: true, onDismiss: () => setFlash([]) }]);
@@ -39,10 +41,10 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await login(email, password);
-      // Hard redirect — guarantees page change
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } catch (e: any) {
       showError(e.message || "Sign in failed.");
+    } finally {
       setLoading(false);
     }
   };
@@ -62,13 +64,13 @@ export default function AuthPage() {
   return (
     <ContentLayout
       header={
-        <Box padding={{ top: "xxl", bottom: "l" }} textAlign="center">
+        <Box padding={{ top: "l", bottom: "l" }} textAlign="center">
           <SpaceBetween size="xs">
-            <div style={{ fontSize: "42px", fontWeight: 900, background: "linear-gradient(135deg, #0972d3 0%, #44b9d6 50%, #1b9e77 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <div style={{ fontSize: "36px", fontWeight: 900, background: "linear-gradient(135deg, #0972d3 0%, #44b9d6 50%, #1b9e77 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               LastMile2Aurora
             </div>
             <Box variant="p" fontSize="heading-l" color="text-body-secondary">
-              AWS SCT migrates your schema. <b>We migrate your code.</b>
+              AWS SCT migrates your schema. <b>This tool migrates your code.</b>
             </Box>
             <Box variant="p" color="text-body-secondary">
               Real-time migration watchdog for Oracle → Aurora PostgreSQL
@@ -78,7 +80,6 @@ export default function AuthPage() {
       }
     >
       <SpaceBetween size="xl">
-        {/* Feature cards */}
         <ColumnLayout columns={3}>
           <div style={{ background: "linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #d1e5f0" }}>
             <SpaceBetween size="s">
@@ -86,9 +87,7 @@ export default function AuthPage() {
                 <Icon name="search" variant="inverted" size="medium" />
               </div>
               <Box variant="h3">Live Monitor</Box>
-              <Box color="text-body-secondary">
-                Queries execute against both Oracle and Aurora PostgreSQL simultaneously. Every result compared cell-by-cell in real-time.
-              </Box>
+              <Box color="text-body-secondary">Queries execute against both Oracle and Aurora PostgreSQL simultaneously. Every result compared cell-by-cell in real-time.</Box>
             </SpaceBetween>
           </div>
           <div style={{ background: "linear-gradient(180deg, #fff8f0 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #f0d9b5" }}>
@@ -97,9 +96,7 @@ export default function AuthPage() {
                 <Icon name="status-warning" variant="inverted" size="medium" />
               </div>
               <Box variant="h3">Detect Regressions</Box>
-              <Box color="text-body-secondary">
-                Catches row count mismatches, schema drift, data differences, and performance regressions (&gt;20% slower) instantly.
-              </Box>
+              <Box color="text-body-secondary">Catches row count mismatches, schema drift, data differences, and performance regressions (&gt;20% slower) instantly.</Box>
             </SpaceBetween>
           </div>
           <div style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #bbf7d0" }}>
@@ -108,14 +105,11 @@ export default function AuthPage() {
                 <Icon name="gen-ai" variant="inverted" size="medium" />
               </div>
               <Box variant="h3">Auto-Remediate</Box>
-              <Box color="text-body-secondary">
-                LLM-powered query rewriting via Amazon Bedrock. Human-in-the-loop approval or fully autonomous mode.
-              </Box>
+              <Box color="text-body-secondary">LLM-powered query rewriting via Amazon Bedrock. Human-in-the-loop approval or fully autonomous mode.</Box>
             </SpaceBetween>
           </div>
         </ColumnLayout>
 
-        {/* Oracle quirks banner */}
         <div style={{ background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)", borderRadius: "12px", padding: "20px 32px", color: "white" }}>
           <ColumnLayout columns={2}>
             <Box>
@@ -126,28 +120,24 @@ export default function AuthPage() {
             </Box>
             <Box textAlign="right">
               <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Powered By</div>
-              <div style={{ color: "white", fontSize: "14px", marginTop: "8px" }}>
-                Amazon Bedrock (Claude) • Aurora PostgreSQL 16 • Oracle SE2 19c
-              </div>
+              <div style={{ color: "white", fontSize: "14px", marginTop: "8px" }}>Amazon Bedrock (Claude) • Aurora PostgreSQL 16 • Oracle SE2 19c</div>
             </Box>
           </ColumnLayout>
         </div>
 
-        {/* Auth form */}
         <Flashbar items={flash} />
         <ColumnLayout columns={2}>
           <div style={{ padding: "32px 0" }}>
             <SpaceBetween size="l">
               <Box variant="h2">Get Started</Box>
               <Box color="text-body-secondary" fontSize="heading-s">
-                Sign in to access the live migration dashboard. Run demo workloads, translate Oracle SQL to PostgreSQL, and validate results — all in one place.
+                Sign in to access the live migration dashboard. Run demo workloads, translate Oracle SQL, and validate results.
               </Box>
               <SpaceBetween size="xs">
                 <Box><b>✓</b> 16 pre-built Oracle demo queries</Box>
                 <Box><b>✓</b> Real Oracle RDS + Aurora PostgreSQL</Box>
                 <Box><b>✓</b> Deep diff: row count, schema, cell-by-cell</Box>
                 <Box><b>✓</b> LLM auto-remediation via Bedrock</Box>
-                <Box><b>✓</b> Export reports to markdown</Box>
               </SpaceBetween>
             </SpaceBetween>
           </div>
@@ -156,22 +146,9 @@ export default function AuthPage() {
               { id: "signin", label: "Sign In", content: (
                 <Form actions={<Button variant="primary" loading={loading} onClick={handleSignIn} fullWidth>Sign In</Button>}>
                   <SpaceBetween size="l">
-                    <FormField label="Email">
-                      <Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="you@example.com" />
-                    </FormField>
-                    <FormField label="Password">
-                      <Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" placeholder="Enter your password"
-                        onKeyDown={({ detail }) => { if (detail.key === "Enter") handleSignIn(); }} />
-                    </FormField>
-                  </SpaceBetween>
-                </Form>
-              )},
-              { id: "signup", label: "Create Account", content: (
-                <Form actions={<Button variant="primary" loading={loading} onClick={handleSignUp} fullWidth>Create Account</Button>}>
-                  <SpaceBetween size="l">
-                    <FormField label="Full Name"><Input value={name} onChange={({ detail }) => setName(detail.value)} placeholder="Your Name" /></FormField>
                     <FormField label="Email"><Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="you@example.com" /></FormField>
-                    <FormField label="Password" description="Min 8 chars, uppercase, lowercase, number"><Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" /></FormField>
+                    <FormField label="Password"><Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" placeholder="Enter your password"
+                      onKeyDown={({ detail }) => { if (detail.key === "Enter") handleSignIn(); }} /></FormField>
                   </SpaceBetween>
                 </Form>
               )},

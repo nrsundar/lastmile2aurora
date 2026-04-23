@@ -11,9 +11,7 @@ import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import ExpandableSection from "@cloudscape-design/components/expandable-section";
 import Alert from "@cloudscape-design/components/alert";
 import Badge from "@cloudscape-design/components/badge";
-import { useAuth } from "../hooks/useAuth";
 import { translateOracleToPostgres } from "../lib/sql-translator";
-import { useLocation } from "wouter";
 
 const EXAMPLES = [
   { label: "NVL + ROWNUM + SYSDATE", sql: "SELECT e.first_name, NVL(e.commission_pct, 0) AS commission,\n       SYSDATE AS today\nFROM employees e\nWHERE ROWNUM <= 10\nORDER BY e.salary DESC" },
@@ -25,12 +23,8 @@ const EXAMPLES = [
 ];
 
 export default function TranslatePage() {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
   const [oracleSQL, setOracleSQL] = useState(EXAMPLES[0].sql);
   const [result, setResult] = useState<any>(null);
-
-  if (!user) { navigate("/auth"); return null; }
 
   const handleTranslate = () => {
     const r = translateOracleToPostgres(oracleSQL);

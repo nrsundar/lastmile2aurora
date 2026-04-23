@@ -4,12 +4,10 @@ import { getCurrentUser, signIn, signUp, confirmSignUp, signOut, type AuthUser }
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   confirm: (email: string, code: string) => Promise<void>;
   logout: () => void;
-  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -17,7 +15,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getCurrentUser()
@@ -25,24 +22,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (u) localStorage.setItem("id_token", u.token);
         setUser(u);
       })
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    setError(null);
+  const login = useCallback(async (email: string, password: string) => {
     const u = await signIn(email, password);
     localStorage.setItem("id_token", u.token);
     setUser(u);
-    return true;
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
-    setError(null);
     await signUp(email, password, name);
   }, []);
 
   const confirm = useCallback(async (email: string, code: string) => {
-    setError(null);
     await confirmSignUp(email, code);
   }, []);
 
@@ -50,13 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut();
     localStorage.removeItem("id_token");
     setUser(null);
-    window.location.href = "/";
   }, []);
 
-  const clearError = useCallback(() => setError(null), []);
-
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, confirm, logout, clearError }}>
+    <AuthContext.Provider value={{ user, loading, login, register, confirm, logout }}>
       {children}
     </AuthContext.Provider>
   );

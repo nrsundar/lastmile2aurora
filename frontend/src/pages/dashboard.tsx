@@ -9,9 +9,7 @@ import Button from "@cloudscape-design/components/button";
 import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Alert from "@cloudscape-design/components/alert";
-import { useAuth } from "../hooks/useAuth";
 import { api } from "../lib/api";
-import { useLocation } from "wouter";
 
 import demoQueries from "../../mock-workload-queries.json";
 
@@ -26,16 +24,9 @@ interface QueryResult {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
   const [simulating, setSimulating] = useState(false);
   const [results, setResults] = useState<QueryResult[]>([]);
   const [error, setError] = useState("");
-
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
 
   const runDemo = async () => {
     setSimulating(true);
