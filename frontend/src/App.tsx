@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Router, Route, Switch } from "wouter";
+import { Router, Route, Switch, Redirect } from "wouter";
 import { AuthProvider } from "./hooks/useAuth";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./pages/auth";
@@ -14,10 +14,12 @@ function AppRouter() {
     <Router>
       <AppLayout>
         <Switch>
-          <Route path="/" component={DashboardPage} />
+          <Route path="/" component={AuthPage} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/dashboard" component={DashboardPage} />
           <Route path="/translate" component={TranslatePage} />
           <Route path="/report" component={ReportPage} />
+          <Route><Redirect to="/" /></Route>
         </Switch>
       </AppLayout>
     </Router>

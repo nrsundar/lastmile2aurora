@@ -228,7 +228,7 @@ Resources:
         - { Name: email, Required: true, Mutable: true }
         - { Name: name, Required: false, Mutable: true }
       AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: false
+        AllowAdminCreateUserOnly: true
 
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient

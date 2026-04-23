@@ -5,7 +5,7 @@ interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string) => Promise<void>;
   confirm: (email: string, code: string) => Promise<void>;
   logout: () => void;
@@ -19,27 +19,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { getCurrentUser().then(setUser).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    getCurrentUser()
+      .then((u) => {
+        if (u) localStorage.setItem("id_token", u.token);
+        setUser(u);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setError(null);
-    try { const u = await signIn(email, password); localStorage.setItem("id_token", u.token); setUser(u); } catch (e: any) { setError(e.message); throw e; }
+    const u = await signIn(email, password);
+    localStorage.setItem("id_token", u.token);
+    setUser(u);
+    return true;
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
     setError(null);
-    try { await signUp(email, password, name); } catch (e: any) { setError(e.message); throw e; }
+    await signUp(email, password, name);
   }, []);
 
   const confirm = useCallback(async (email: string, code: string) => {
     setError(null);
-    try { await confirmSignUp(email, code); } catch (e: any) { setError(e.message); throw e; }
+    await confirmSignUp(email, code);
   }, []);
 
-  const logout = useCallback(() => { signOut(); localStorage.removeItem("id_token"); setUser(null); }, []);
+  const logout = useCallback(() => {
+    signOut();
+    localStorage.removeItem("id_token");
+    setUser(null);
+    window.location.href = "/";
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
-  return <AuthContext.Provider value={{ user, loading, error, login, register, confirm, logout, clearError }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, error, login, register, confirm, logout, clearError }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

@@ -9,108 +9,118 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Box from "@cloudscape-design/components/box";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import ExpandableSection from "@cloudscape-design/components/expandable-section";
+import Alert from "@cloudscape-design/components/alert";
+import Badge from "@cloudscape-design/components/badge";
 import { useAuth } from "../hooks/useAuth";
-import { api } from "../lib/api";
+import { translateOracleToPostgres } from "../lib/sql-translator";
 import { useLocation } from "wouter";
+
+const EXAMPLES = [
+  { label: "NVL + ROWNUM + SYSDATE", sql: "SELECT e.first_name, NVL(e.commission_pct, 0) AS commission,\n       SYSDATE AS today\nFROM employees e\nWHERE ROWNUM <= 10\nORDER BY e.salary DESC" },
+  { label: "DECODE", sql: "SELECT first_name, DECODE(department_id, 10, 'Engineering', 20, 'Marketing', 'Other') AS dept\nFROM employees" },
+  { label: "Oracle (+) outer join", sql: "SELECT e.first_name, d.department_name\nFROM employees e, departments d\nWHERE e.department_id = d.department_id(+)" },
+  { label: "DUAL + TRUNC", sql: "SELECT TRUNC(SYSDATE) FROM DUAL" },
+  { label: "Sequence", sql: "SELECT emp_seq.NEXTVAL FROM DUAL" },
+  { label: "Hints + SUBSTR", sql: "SELECT /*+ INDEX(e emp_salary_idx) */ SUBSTR(email, 1, 5) AS prefix\nFROM employees e\nWHERE salary > 90000" },
+];
 
 export default function TranslatePage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
-  const [oracleSQL, setOracleSQL] = useState("SELECT e.first_name, NVL(e.commission_pct, 0) AS commission,\n       SYSDATE AS today\nFROM employees e\nWHERE ROWNUM <= 10\nORDER BY e.salary DESC");
+  const [oracleSQL, setOracleSQL] = useState(EXAMPLES[0].sql);
   const [result, setResult] = useState<any>(null);
-  const [compareResult, setCompareResult] = useState<any>(null);
-  const [remediateResult, setRemediateResult] = useState<any>(null);
-  const [loading, setLoading] = useState("");
 
   if (!user) { navigate("/auth"); return null; }
 
-  const handleTranslate = async () => {
-    setLoading("translate");
-    try { setResult(await api.translate(oracleSQL)); } catch (e) { console.error(e); }
-    setLoading("");
-  };
-
-  const handleCompare = async () => {
-    if (!result?.translated) return;
-    setLoading("compare");
-    try { setCompareResult(await api.executeCompare(oracleSQL, result.translated)); } catch (e) { console.error(e); }
-    setLoading("");
-  };
-
-  const handleRemediate = async () => {
-    if (!result?.translated) return;
-    setLoading("remediate");
-    try { setRemediateResult(await api.remediate(result.translated)); } catch (e) { console.error(e); }
-    setLoading("");
+  const handleTranslate = () => {
+    const r = translateOracleToPostgres(oracleSQL);
+    setResult(r);
   };
 
   return (
-    <ContentLayout header={<Header variant="h1">Translate & Validate</Header>}>
+    <ContentLayout
+      header={
+        <Header variant="h1" description="Paste Oracle SQL and instantly see the PostgreSQL equivalent. All 15 Oracle quirks are handled client-side — no backend needed.">
+          Translate Oracle → PostgreSQL
+        </Header>
+      }
+    >
       <SpaceBetween size="l">
-        <Container header={<Header variant="h2">Oracle SQL Input</Header>}>
-          <SpaceBetween size="m">
-            <Textarea value={oracleSQL} onChange={({ detail }) => setOracleSQL(detail.value)} rows={6} />
-            <Button variant="primary" loading={loading === "translate"} onClick={handleTranslate}>Translate to PostgreSQL</Button>
+        {/* Example buttons */}
+        <Container header={<Header variant="h3">Quick Examples</Header>}>
+          <SpaceBetween size="xs" direction="horizontal">
+            {EXAMPLES.map((ex, i) => (
+              <Button key={i} variant="inline-link" onClick={() => { setOracleSQL(ex.sql); setResult(null); }}>{ex.label}</Button>
+            ))}
           </SpaceBetween>
         </Container>
 
+        {/* Input */}
+        <Container header={<Header variant="h2">Oracle SQL Input</Header>}>
+          <SpaceBetween size="m">
+            <Textarea value={oracleSQL} onChange={({ detail }) => setOracleSQL(detail.value)} rows={6} placeholder="Paste your Oracle SQL here..." />
+            <Button variant="primary" onClick={handleTranslate} iconName="gen-ai">Translate to PostgreSQL</Button>
+          </SpaceBetween>
+        </Container>
+
+        {/* Result */}
         {result && (
-          <Container header={<Header variant="h2">Translation Result</Header>}>
+          <SpaceBetween size="l">
             <ColumnLayout columns={2}>
-              <SpaceBetween size="s">
-                <Box variant="h4">Original (Oracle)</Box>
-                <Box variant="code">{result.original}</Box>
-              </SpaceBetween>
-              <SpaceBetween size="s">
-                <Box variant="h4">Translated (PostgreSQL)</Box>
-                <Box variant="code">{result.translated}</Box>
-              </SpaceBetween>
+              <Container header={<Header variant="h3">Original (Oracle)</Header>}>
+                <div style={{ fontFamily: "monospace", fontSize: "14px", whiteSpace: "pre-wrap", background: "#1e293b", color: "#e2e8f0", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
+                  {result.original}
+                </div>
+              </Container>
+              <Container header={<Header variant="h3">Translated (PostgreSQL)</Header>}>
+                <div style={{ fontFamily: "monospace", fontSize: "14px", whiteSpace: "pre-wrap", background: "#0f2e1a", color: "#86efac", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
+                  {result.translated}
+                </div>
+              </Container>
             </ColumnLayout>
-            {result.changes?.length > 0 && (
-              <ExpandableSection headerText={`Changes (${result.changes.length})`}>
-                <ul>{result.changes.map((c: any, i: number) => <li key={i}>{typeof c === "string" ? c : JSON.stringify(c)}</li>)}</ul>
-              </ExpandableSection>
+
+            {/* Changes */}
+            {result.changes.length > 0 && (
+              <Container header={<Header variant="h3">Transformations Applied <Badge color="blue">{result.changes.length}</Badge></Header>}>
+                <SpaceBetween size="xs">
+                  {result.changes.map((c: string, i: number) => (
+                    <div key={i}>
+                      <StatusIndicator type="success">{c}</StatusIndicator>
+                    </div>
+                  ))}
+                </SpaceBetween>
+              </Container>
             )}
-            <SpaceBetween direction="horizontal" size="s">
-              <Button loading={loading === "compare"} onClick={handleCompare}>Validate (Compare Results)</Button>
-              <Button loading={loading === "remediate"} onClick={handleRemediate}>Auto-Remediate (LLM Rewrite)</Button>
-            </SpaceBetween>
-          </Container>
-        )}
 
-        {compareResult && (
-          <Container header={<Header variant="h2">Validation Result</Header>}>
-            <SpaceBetween size="s">
-              <StatusIndicator type={compareResult.diff?.passed ? "success" : "error"}>
-                {compareResult.diff?.passed ? "PASSED — Safe to cut over" : "FAILED — Needs review"}
-              </StatusIndicator>
+            {/* Issues */}
+            {result.issues.length > 0 && (
+              <Alert type="warning" header={`${result.issues.length} issue(s) need manual review`}>
+                <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                  {result.issues.map((issue: string, i: number) => <li key={i}>{issue}</li>)}
+                </ul>
+              </Alert>
+            )}
+
+            {/* Summary */}
+            <div style={{ background: "linear-gradient(135deg, #0f172a, #1e293b)", borderRadius: "12px", padding: "20px", color: "white" }}>
               <ColumnLayout columns={3}>
-                <Box><strong>Row Count:</strong> {compareResult.diff?.checks?.row_count?.passed ? "✅ Match" : "❌ Mismatch"}</Box>
-                <Box><strong>Schema:</strong> {compareResult.diff?.checks?.schema?.passed ? "✅ Match" : "❌ Mismatch"}</Box>
-                <Box><strong>Data:</strong> {compareResult.diff?.checks?.cell_comparison?.passed ? "✅ Match" : `❌ ${compareResult.diff?.checks?.cell_comparison?.mismatches} mismatches`}</Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase" }}>Transformations</div>
+                  <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4ade80" }}>{result.changes.length}</div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase" }}>Issues</div>
+                  <div style={{ fontSize: "28px", fontWeight: "bold", color: result.issues.length > 0 ? "#fbbf24" : "#4ade80" }}>{result.issues.length}</div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "12px", textTransform: "uppercase" }}>Status</div>
+                  <div style={{ fontSize: "28px", fontWeight: "bold", color: result.issues.length === 0 ? "#4ade80" : "#fbbf24" }}>
+                    {result.issues.length === 0 ? "✓ Ready" : "⚠ Review"}
+                  </div>
+                </Box>
               </ColumnLayout>
-              <Box>
-                <strong>Performance:</strong> Oracle {compareResult.diff?.checks?.performance?.source_ms}ms → Aurora PG {compareResult.diff?.checks?.performance?.target_ms}ms
-                ({compareResult.diff?.checks?.performance?.delta_pct > 0 ? "+" : ""}{compareResult.diff?.checks?.performance?.delta_pct}%)
-              </Box>
-            </SpaceBetween>
-          </Container>
-        )}
-
-        {remediateResult && (
-          <Container header={<Header variant="h2">LLM Remediation</Header>}>
-            <SpaceBetween size="s">
-              <Box variant="h4">Rewritten SQL</Box>
-              <Box variant="code">{remediateResult.rewritten}</Box>
-              <Box variant="h4">Rationale</Box>
-              <Box>{remediateResult.rationale}</Box>
-              {remediateResult.changes?.length > 0 && (
-                <ExpandableSection headerText="Changes">
-                  <ul>{remediateResult.changes.map((c: string, i: number) => <li key={i}>{c}</li>)}</ul>
-                </ExpandableSection>
-              )}
-            </SpaceBetween>
-          </Container>
+            </div>
+          </SpaceBetween>
         )}
       </SpaceBetween>
     </ContentLayout>

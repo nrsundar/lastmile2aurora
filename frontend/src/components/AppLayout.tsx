@@ -8,32 +8,54 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [location, navigate] = useLocation();
 
+  const isLanding = location === "/" || location === "/auth";
+
   return (
     <>
-      <TopNavigation
-        identity={{ title: "LastMile2Aurora", href: "/", logo: { src: "", alt: "LM2A" } }}
-        utilities={
-          user
-            ? [{ type: "menu-dropdown", text: user.email, items: [{ id: "signout", text: "Sign out" }], onItemClick: () => logout() }]
-            : [{ type: "button", text: "Sign in", onClick: () => navigate("/auth") }]
-        }
-      />
-      <AppLayoutCS
-        navigation={
-          <SideNavigation
-            activeHref={location}
-            onFollow={(e) => { e.preventDefault(); navigate(e.detail.href); }}
-            header={{ text: "Migration Watchdog", href: "/" }}
-            items={[
-              { type: "link", text: "Live Dashboard", href: "/" },
-              { type: "link", text: "Translate SQL", href: "/translate" },
-              { type: "link", text: "Reports", href: "/report" },
-            ]}
-          />
-        }
-        content={children}
-        toolsHide
-      />
+      <div id="top-nav">
+        <TopNavigation
+          identity={{
+            title: "LastMile2Aurora",
+            href: user ? "/dashboard" : "/",
+            logo: { src: "", alt: "" },
+          }}
+          utilities={
+            user
+              ? [
+                  { type: "button", text: "Dashboard", onClick: () => navigate("/dashboard") },
+                  {
+                    type: "menu-dropdown",
+                    text: user.email,
+                    items: [{ id: "signout", text: "Sign out" }],
+                    onItemClick: () => { logout(); navigate("/"); },
+                  },
+                ]
+              : []
+          }
+        />
+      </div>
+      {user && !isLanding ? (
+        <AppLayoutCS
+          navigation={
+            <SideNavigation
+              activeHref={location}
+              onFollow={(e) => { e.preventDefault(); navigate(e.detail.href); }}
+              header={{ text: "Migration Watchdog", href: "/dashboard" }}
+              items={[
+                { type: "link", text: "Live Dashboard", href: "/dashboard" },
+                { type: "link", text: "Translate SQL", href: "/translate" },
+                { type: "link", text: "Reports", href: "/report" },
+                { type: "divider" },
+                { type: "link", text: "Oracle Quirks: 15 handled", href: "/translate" },
+              ]}
+            />
+          }
+          content={children}
+          toolsHide
+        />
+      ) : (
+        <div>{children}</div>
+      )}
     </>
   );
 }
