@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Arial, sans-serif">
+  <defs>
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0972d3"/><stop offset="100%" style="stop-color:#44b9d6"/></linearGradient>
+    <linearGradient id="orange" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#d97706"/><stop offset="100%" style="stop-color:#f59e0b"/></linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#16a34a"/><stop offset="100%" style="stop-color:#4ade80"/></linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#7c3aed"/><stop offset="100%" style="stop-color:#a78bfa"/></linearGradient>
+    <linearGradient id="dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1e293b"/><stop offset="100%" style="stop-color:#334155"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="520" rx="12" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="35" text-anchor="middle" font-size="18" font-weight="bold" fill="#0f172a">LastMile2Aurora — Architecture</text>
+
+  <!-- Customer Application -->
+  <rect x="30" y="60" width="180" height="80" rx="10" fill="url(#purple)" filter="url(#shadow)"/>
+  <text x="120" y="92" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Customer App</text>
+  <text x="120" y="112" text-anchor="middle" font-size="10" fill="#e2e8f0">Tagged SQL Queries</text>
+  <text x="120" y="126" text-anchor="middle" font-size="9" fill="#c4b5fd">/* tag:order_lookup */</text>
+
+  <!-- HammerDB (Demo) -->
+  <rect x="30" y="170" width="180" height="70" rx="10" fill="url(#dark)" filter="url(#shadow)" stroke="#475569" stroke-width="1" stroke-dasharray="4"/>
+  <text x="120" y="198" text-anchor="middle" font-size="12" font-weight="bold" fill="#94a3b8">HammerDB (Demo)</text>
+  <text x="120" y="216" text-anchor="middle" font-size="10" fill="#64748b">TPC-C Load Generator</text>
+  <text x="120" y="230" text-anchor="middle" font-size="9" fill="#64748b">Small / Medium / Large</text>
+
+  <!-- Oracle EE -->
+  <rect x="300" y="60" width="180" height="100" rx="10" fill="url(#orange)" filter="url(#shadow)"/>
+  <text x="390" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="white">Oracle EE 19c</text>
+  <text x="390" y="106" text-anchor="middle" font-size="10" fill="#fef3c7">Source Database</text>
+  <text x="390" y="122" text-anchor="middle" font-size="9" fill="#fde68a">V$SQL • V$SESSTAT</text>
+  <text x="390" y="136" text-anchor="middle" font-size="9" fill="#fde68a">Data Blocks Read</text>
+  <text x="390" y="150" text-anchor="middle" font-size="9" fill="#fde68a">Private Subnet • Encrypted</text>
+
+  <!-- Aurora PG -->
+  <rect x="300" y="185" width="180" height="100" rx="10" fill="url(#blue)" filter="url(#shadow)"/>
+  <text x="390" y="213" text-anchor="middle" font-size="14" font-weight="bold" fill="white">Aurora PG 16</text>
+  <text x="390" y="231" text-anchor="middle" font-size="10" fill="#bfdbfe">Target Database</text>
+  <text x="390" y="247" text-anchor="middle" font-size="9" fill="#93c5fd">pg_stat_statements</text>
+  <text x="390" y="261" text-anchor="middle" font-size="9" fill="#93c5fd">Pages Read (shared_blks_read)</text>
+  <text x="390" y="275" text-anchor="middle" font-size="9" fill="#93c5fd">Private Subnet • KMS CMK</text>
+
+  <!-- Arrows: App → DBs -->
+  <line x1="210" y1="95" x2="298" y2="95" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <line x1="210" y1="105" x2="298" y2="220" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrowPurple)" stroke-dasharray="4"/>
+  <text x="255" y="88" text-anchor="middle" font-size="9" fill="#7c3aed">Tagged</text>
+  <text x="255" y="170" text-anchor="middle" font-size="9" fill="#7c3aed" transform="rotate(-30 255 170)">Tagged</text>
+
+  <!-- HammerDB → DBs -->
+  <line x1="210" y1="195" x2="298" y2="120" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="210" y1="210" x2="298" y2="230" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- LastMile2Aurora Engine -->
+  <rect x="560" y="60" width="300" height="230" rx="12" fill="white" filter="url(#shadow)" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="560" y="60" width="300" height="40" rx="12" fill="url(#green)"/>
+  <rect x="560" y="88" width="300" height="12" fill="url(#green)"/>
+  <text x="710" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="white">LastMile2Aurora Engine</text>
+  <text x="710" y="97" text-anchor="middle" font-size="10" fill="#dcfce7">ECS Fargate • CloudFront HTTPS</text>
+
+  <!-- Engine components -->
+  <rect x="580" y="115" width="120" height="35" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="640" y="137" text-anchor="middle" font-size="10" font-weight="bold" fill="#166534">Tag Matcher</text>
+
+  <rect x="720" y="115" width="120" height="35" rx="6" fill="#fefce8" stroke="#fde047"/>
+  <text x="780" y="137" text-anchor="middle" font-size="10" font-weight="bold" fill="#854d0e">Deep Diff</text>
+
+  <rect x="580" y="160" width="120" height="35" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="640" y="177" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">Perf Compare</text>
+  <text x="640" y="189" text-anchor="middle" font-size="8" fill="#3b82f6">Blocks vs Pages</text>
+
+  <rect x="720" y="160" width="120" height="35" rx="6" fill="#fdf2f8" stroke="#f9a8d4"/>
+  <text x="780" y="177" text-anchor="middle" font-size="10" font-weight="bold" fill="#9d174d">LLM Rewrite</text>
+  <text x="780" y="189" text-anchor="middle" font-size="8" fill="#ec4899">Amazon Bedrock</text>
+
+  <rect x="580" y="205" width="260" height="35" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="710" y="222" text-anchor="middle" font-size="10" font-weight="bold" fill="#334155">Alert Engine</text>
+  <text x="710" y="234" text-anchor="middle" font-size="8" fill="#64748b">Human-in-the-loop or Autonomous</text>
+
+  <rect x="580" y="250" width="260" height="30" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="710" y="270" text-anchor="middle" font-size="10" fill="#334155">Cognito Auth • MFA • CloudWatch Logs</text>
+
+  <!-- Arrows: DBs → Engine -->
+  <line x1="482" y1="110" x2="558" y2="130" stroke="#d97706" stroke-width="2"/>
+  <line x1="482" y1="235" x2="558" y2="175" stroke="#0972d3" stroke-width="2"/>
+  <text x="520" y="118" text-anchor="middle" font-size="8" fill="#d97706">V$SQL stats</text>
+  <text x="520" y="210" text-anchor="middle" font-size="8" fill="#0972d3">pg_stat stats</text>
+
+  <!-- Dashboard -->
+  <rect x="300" y="340" width="560" height="160" rx="12" fill="white" filter="url(#shadow)" stroke="#e2e8f0"/>
+  <rect x="300" y="340" width="560" height="35" rx="12" fill="url(#dark)"/>
+  <rect x="300" y="363" width="560" height="12" fill="url(#dark)"/>
+  <text x="580" y="363" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Dashboard — Amplify + Cloudscape</text>
+
+  <rect x="320" y="390" width="160" height="50" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="400" y="412" text-anchor="middle" font-size="11" font-weight="bold" fill="#166534">Live Monitor</text>
+  <text x="400" y="428" text-anchor="middle" font-size="9" fill="#4ade80">Tagged query stream</text>
+
+  <rect x="500" y="390" width="160" height="50" rx="6" fill="#fefce8" stroke="#fde047"/>
+  <text x="580" y="412" text-anchor="middle" font-size="11" font-weight="bold" fill="#854d0e">Translate</text>
+  <text x="580" y="428" text-anchor="middle" font-size="9" fill="#eab308">Oracle → PostgreSQL</text>
+
+  <rect x="680" y="390" width="160" height="50" rx="6" fill="#fdf2f8" stroke="#f9a8d4"/>
+  <text x="760" y="412" text-anchor="middle" font-size="11" font-weight="bold" fill="#9d174d">Reports</text>
+  <text x="760" y="428" text-anchor="middle" font-size="9" fill="#ec4899">Blocks vs Pages • Alerts</text>
+
+  <rect x="320" y="450" width="520" height="35" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="580" y="472" text-anchor="middle" font-size="10" fill="#334155">Metrics: Oracle Data Blocks Read vs PG Pages Read • Row Count • Execution Time • Data Volume Comparison</text>
+
+  <!-- Arrow: Engine → Dashboard -->
+  <line x1="710" y1="282" x2="710" y2="338" stroke="#16a34a" stroke-width="2"/>
+  <text x="730" y="315" font-size="9" fill="#16a34a">WebSocket</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7c3aed"/></marker>
+  </defs>
+</svg>
