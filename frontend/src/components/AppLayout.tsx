@@ -46,6 +46,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 { type: "link", text: "Translate SQL", href: "/translate" },
                 { type: "link", text: "Reports", href: "/report" },
                 { type: "divider" },
+                { type: "link", text: "Admin Dashboard", href: "/admin" },
+                { type: "divider" },
                 { type: "link", text: "Oracle Quirks: 15 handled", href: "/translate" },
               ]}
             />
