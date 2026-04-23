@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import Container from "@cloudscape-design/components/container";
@@ -12,8 +12,8 @@ import Alert from "@cloudscape-design/components/alert";
 import Tiles from "@cloudscape-design/components/tiles";
 import FormField from "@cloudscape-design/components/form-field";
 import Input from "@cloudscape-design/components/input";
-import Tabs from "@cloudscape-design/components/tabs";
 import RadioGroup from "@cloudscape-design/components/radio-group";
+import ProgressBar from "@cloudscape-design/components/progress-bar";
 import { api } from "../lib/api";
 
 import demoQueries from "../../mock-workload-queries.json";
@@ -28,11 +28,8 @@ interface QueryResult {
 }
 
 export default function DashboardPage() {
-  // Mode selection
   const [mode, setMode] = useState<string | null>(null);
   const [workloadSize, setWorkloadSize] = useState("small");
-
-  // Custom connection
   const [oracleHost, setOracleHost] = useState("");
   const [oraclePort, setOraclePort] = useState("1521");
   const [oracleService, setOracleService] = useState("");
@@ -43,63 +40,81 @@ export default function DashboardPage() {
   const [pgDatabase, setPgDatabase] = useState("");
   const [pgUser, setPgUser] = useState("");
   const [pgPass, setPgPass] = useState("");
-
-  // Results
   const [simulating, setSimulating] = useState(false);
   const [results, setResults] = useState<QueryResult[]>([]);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [currentQuery, setCurrentQuery] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup timer
+  useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
 
   const runDemo = async () => {
     setSimulating(true);
     setError("");
+    setResults([]);
+    setProgress(0);
+    setElapsed(0);
+
+    const startTime = Date.now();
+    timerRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 500);
+
+    const rounds = workloadSize === "small" ? 1 : workloadSize === "medium" ? 3 : 10;
+    const totalQueries = demoQueries.length * rounds;
+    let completed = 0;
+
     try {
-      const resp = await api.simulate(
-        demoQueries.map((q: any) => ({ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql }))
-      );
-      const mapped = (resp.results || []).map((r: any, i: number) => ({
-        query_hash: r.query_hash,
-        name: demoQueries[i]?.name ?? r.query_hash,
-        passed: r.passed,
-        regression: r.diff_summary?.performance?.regression,
-        oracle_ms: r.diff_summary?.performance?.source_ms,
-        pg_ms: r.diff_summary?.performance?.target_ms,
-      }));
-      setResults(mapped);
+      for (let round = 0; round < rounds; round++) {
+        for (const q of demoQueries) {
+          setCurrentQuery(q.name);
+          setProgress(Math.round((completed / totalQueries) * 100));
+
+          try {
+            const resp = await api.simulate([{ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql }]);
+            const r = resp.results?.[0];
+            if (r) {
+              const mapped: QueryResult = {
+                query_hash: r.query_hash,
+                name: rounds > 1 ? `${q.name} (R${round + 1})` : q.name,
+                passed: r.passed,
+                regression: r.diff_summary?.performance?.regression,
+                oracle_ms: r.diff_summary?.performance?.source_ms,
+                pg_ms: r.diff_summary?.performance?.target_ms,
+              };
+              setResults((prev) => [mapped, ...prev]);
+            }
+          } catch {
+            // Individual query failure — continue
+          }
+          completed++;
+        }
+      }
+      setProgress(100);
     } catch (e: any) {
       setError(e.message || "Failed to run workload.");
     }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
     setSimulating(false);
+    setCurrentQuery("");
   };
 
   const regressions = results.filter((r) => r.regression);
   const passed = results.filter((r) => r.passed && !r.regression);
   const failed = results.filter((r) => !r.passed && !r.regression);
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
-  // Mode selection screen
+  // Mode selection
   if (!mode) {
     return (
       <ContentLayout header={<Header variant="h1" description="Choose how you want to run the migration watchdog.">LastMile2Aurora — Dashboard</Header>}>
-        <SpaceBetween size="l">
-          <Tiles
-            onChange={({ detail }) => setMode(detail.value)}
-            value={mode ?? ""}
-            columns={2}
-            items={[
-              {
-                value: "demo",
-                label: "Demo Mode",
-                description: "Use preconfigured Oracle EE 19c and Aurora PG 16 with HammerDB TPC-C workload. Great for demos and workshops.",
-                image: <Box textAlign="center" fontSize="display-l">🎯</Box>,
-              },
-              {
-                value: "custom",
-                label: "Connect Your Databases",
-                description: "Enter your own Oracle source and Aurora PostgreSQL target connection strings. Use your real application workload with tagged queries.",
-                image: <Box textAlign="center" fontSize="display-l">🔌</Box>,
-              },
-            ]}
-          />
-        </SpaceBetween>
+        <Tiles onChange={({ detail }) => setMode(detail.value)} value={mode ?? ""} columns={2} items={[
+          { value: "demo", label: "Demo Mode", description: "Use preconfigured Oracle EE 19c and Aurora PG 16 with tagged demo queries. Great for demos and workshops.", image: <Box textAlign="center" fontSize="display-l">🎯</Box> },
+          { value: "custom", label: "Connect Your Databases", description: "Enter your own Oracle source and Aurora PostgreSQL target connection strings. Use your real application workload with tagged queries.", image: <Box textAlign="center" fontSize="display-l">🔌</Box> },
+        ]} />
       </ContentLayout>
     );
   }
@@ -109,9 +124,7 @@ export default function DashboardPage() {
     return (
       <ContentLayout header={<Header variant="h1" description="Enter your Oracle source and Aurora PostgreSQL target connections." actions={<Button variant="link" onClick={() => setMode(null)}>← Back</Button>}>Connect Your Databases</Header>}>
         <SpaceBetween size="l">
-          <Alert type="info">
-            <b>Tag your queries first!</b> Add SQL comments like <code>/* tag:order_lookup */</code> to your business-critical queries in both Oracle and PostgreSQL code. This tool matches queries by tag, not by SQL hash.
-          </Alert>
+          <Alert type="info"><b>Tag your queries first!</b> Add SQL comments like <code>/* tag:order_lookup */</code> to your business-critical queries in both Oracle and PostgreSQL code.</Alert>
           <ColumnLayout columns={2}>
             <Container header={<Header variant="h3">Oracle Source</Header>}>
               <SpaceBetween size="m">
@@ -143,103 +156,109 @@ export default function DashboardPage() {
           <Box textAlign="center">
             <SpaceBetween size="s" direction="horizontal" alignItems="center">
               <Button variant="primary" iconName="search">Test Connections</Button>
-              <Button variant="normal">Start Monitoring Tagged Queries</Button>
+              <Button>Start Monitoring Tagged Queries</Button>
             </SpaceBetween>
           </Box>
-          <Alert type="warning">
-            <b>Coming soon:</b> Custom database connections will be available in the next release. For now, use <b>Demo Mode</b> to see the full workflow.
-          </Alert>
+          <Alert type="warning"><b>Coming soon:</b> Custom database connections will be available in the next release. For now, use <b>Demo Mode</b>.</Alert>
         </SpaceBetween>
       </ContentLayout>
     );
   }
 
-  // Demo mode — workload selection + results
+  // Demo mode — workload config + live results
   return (
     <ContentLayout
-      header={
-        <Header variant="h1"
-          description={mode === "demo" ? "Preconfigured Oracle EE 19c + Aurora PG 16 with tagged demo queries." : "Connected to your databases."}
-          actions={<Button variant="link" onClick={() => { setMode(null); setResults([]); }}>← Change Mode</Button>}
-        >
-          Live Migration Dashboard
-        </Header>
-      }
+      header={<Header variant="h1" description={mode === "demo" ? "Oracle EE 19c → Aurora PG 16 — Tagged demo queries" : "Connected to your databases."} actions={<Button variant="link" onClick={() => { setMode(null); setResults([]); setSimulating(false); }}>← Change Mode</Button>}>Live Migration Dashboard</Header>}
     >
       <SpaceBetween size="l">
         {error && <Alert type="error" dismissible onDismiss={() => setError("")}>{error}</Alert>}
 
-        {/* Workload config */}
+        {/* Workload config — only before running */}
         {results.length === 0 && !simulating && (
           <Container header={<Header variant="h2">Configure Workload</Header>}>
             <SpaceBetween size="l">
-              <FormField label="Workload Size" description="Controls the number of queries and duration of the demo workload.">
-                <RadioGroup
-                  value={workloadSize}
-                  onChange={({ detail }) => setWorkloadSize(detail.value)}
-                  items={[
-                    { value: "small", label: "🟢 Small — 16 queries, quick validation (~30 seconds)", description: "Best for quick demos" },
-                    { value: "medium", label: "🟡 Medium — 16 queries × 3 rounds with varied parameters (~2 minutes)", description: "Best for workshops and POCs" },
-                    { value: "large", label: "🔴 Large — 16 queries × 10 rounds, stress test (~5 minutes)", description: "Best for production simulation" },
-                  ]}
-                />
+              <FormField label="Workload Size">
+                <RadioGroup value={workloadSize} onChange={({ detail }) => setWorkloadSize(detail.value)} items={[
+                  { value: "small", label: "🟢 Small — 16 queries, single pass (~30 sec)", description: "Quick demo" },
+                  { value: "medium", label: "🟡 Medium — 16 queries × 3 rounds (~2 min)", description: "Workshop / POC" },
+                  { value: "large", label: "🔴 Large — 16 queries × 10 rounds (~5 min)", description: "Production simulation" },
+                ]} />
               </FormField>
-              <Box>
-                <Button variant="primary" loading={simulating} onClick={runDemo} iconName="caret-right-filled">
-                  Run {workloadSize.charAt(0).toUpperCase() + workloadSize.slice(1)} Workload
-                </Button>
-              </Box>
+              <Button variant="primary" onClick={runDemo} iconName="caret-right-filled">
+                Run {workloadSize.charAt(0).toUpperCase() + workloadSize.slice(1)} Workload
+              </Button>
             </SpaceBetween>
           </Container>
         )}
 
-        {/* Loading */}
-        {simulating && (
-          <Container>
-            <Box textAlign="center" padding="xxl">
-              <SpaceBetween size="m">
-                <Box variant="h3">Running {workloadSize} workload against Oracle EE and Aurora PG...</Box>
-                <Box color="text-body-secondary">Executing tagged queries on both databases and comparing results.</Box>
-                <StatusIndicator type="in-progress">Processing queries...</StatusIndicator>
-              </SpaceBetween>
-            </Box>
-          </Container>
+        {/* Live progress visualization */}
+        {(simulating || results.length > 0) && (
+          <div style={{ background: simulating ? "linear-gradient(135deg, #0f172a, #1e293b)" : results.every(r => r.passed) ? "linear-gradient(135deg, #052e16, #166534)" : "linear-gradient(135deg, #1e293b, #334155)", borderRadius: "12px", padding: "24px", color: "white" }}>
+            <SpaceBetween size="m">
+              <ColumnLayout columns={5}>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Status</div>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", marginTop: "4px" }}>
+                    {simulating ? <span style={{ color: "#38bdf8" }}>⚡ Running</span> : <span style={{ color: "#4ade80" }}>✓ Complete</span>}
+                  </div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Elapsed</div>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "white", marginTop: "4px" }}>{formatTime(elapsed)}</div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Passed</div>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#4ade80", marginTop: "4px" }}>{passed.length}</div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Regressions</div>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: regressions.length > 0 ? "#f87171" : "#4ade80", marginTop: "4px" }}>{regressions.length}</div>
+                </Box>
+                <Box textAlign="center">
+                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Mismatches</div>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: failed.length > 0 ? "#fbbf24" : "#4ade80", marginTop: "4px" }}>{failed.length}</div>
+                </Box>
+              </ColumnLayout>
+
+              {simulating && (
+                <SpaceBetween size="xs">
+                  <ProgressBar
+                    value={progress}
+                    label={`Processing: ${currentQuery}`}
+                    description={`${results.length} of ${demoQueries.length * (workloadSize === "small" ? 1 : workloadSize === "medium" ? 3 : 10)} queries completed`}
+                    variant="standalone"
+                  />
+                </SpaceBetween>
+              )}
+            </SpaceBetween>
+          </div>
         )}
 
-        {/* Results */}
+        {/* Results table — shows live as queries complete */}
         {results.length > 0 && (
-          <SpaceBetween size="l">
-            <ColumnLayout columns={4}>
-              <Container><Box textAlign="center"><Box variant="awsui-key-label">Queries</Box><Box variant="h1">{results.length}</Box></Box></Container>
-              <Container><Box textAlign="center"><Box variant="awsui-key-label">Passed</Box><Box variant="h1" color="text-status-success">{passed.length}</Box></Box></Container>
-              <Container><Box textAlign="center"><Box variant="awsui-key-label">Regressions</Box><Box variant="h1" color={regressions.length > 0 ? "text-status-error" : "text-status-success"}>{regressions.length}</Box></Box></Container>
-              <Container><Box textAlign="center"><Box variant="awsui-key-label">Mismatches</Box><Box variant="h1" color={failed.length > 0 ? "text-status-warning" : "text-status-success"}>{failed.length}</Box></Box></Container>
-            </ColumnLayout>
-
-            <Table
-              header={
-                <Header variant="h2" actions={<Button onClick={() => setResults([])}>Run Again</Button>}>
-                  Query Results — {workloadSize.charAt(0).toUpperCase() + workloadSize.slice(1)} Workload
-                </Header>
-              }
-              columnDefinitions={[
-                { id: "name", header: "Query (Tag)", cell: (r) => r.name || r.query_hash?.slice(0, 12), sortingField: "name" },
-                { id: "oracle", header: "Oracle (ms)", cell: (r) => r.oracle_ms?.toFixed(1) ?? "—" },
-                { id: "pg", header: "Aurora PG (ms)", cell: (r) => r.pg_ms?.toFixed(1) ?? "—" },
-                { id: "delta", header: "Delta", cell: (r) => {
-                  if (!r.oracle_ms || !r.pg_ms) return "—";
-                  const d = ((r.pg_ms - r.oracle_ms) / r.oracle_ms * 100);
-                  return <span style={{ color: d > 20 ? "#d32f2f" : d < -10 ? "#2e7d32" : "#666" }}>{d > 0 ? "+" : ""}{d.toFixed(0)}%</span>;
-                }},
-                { id: "status", header: "Status", cell: (r) =>
-                  r.regression ? <StatusIndicator type="error">Regression</StatusIndicator> :
-                  r.passed ? <StatusIndicator type="success">Passed</StatusIndicator> :
-                  <StatusIndicator type="warning">Mismatch</StatusIndicator>,
-                },
-              ]}
-              items={results}
-            />
-          </SpaceBetween>
+          <Table
+            header={
+              <Header variant="h2" counter={`(${results.length})`} actions={!simulating ? <Button onClick={() => setResults([])}>Run Again</Button> : undefined}>
+                Query Results — {workloadSize.charAt(0).toUpperCase() + workloadSize.slice(1)} Workload
+              </Header>
+            }
+            columnDefinitions={[
+              { id: "name", header: "Query (Tag)", cell: (r) => r.name || r.query_hash?.slice(0, 12) },
+              { id: "oracle", header: "Oracle (ms)", cell: (r) => r.oracle_ms?.toFixed(1) ?? "—" },
+              { id: "pg", header: "Aurora PG (ms)", cell: (r) => r.pg_ms?.toFixed(1) ?? "—" },
+              { id: "delta", header: "Delta", cell: (r) => {
+                if (!r.oracle_ms || !r.pg_ms) return "—";
+                const d = ((r.pg_ms - r.oracle_ms) / r.oracle_ms * 100);
+                return <span style={{ color: d > 20 ? "#d32f2f" : d < -10 ? "#2e7d32" : "#666", fontWeight: Math.abs(d) > 20 ? "bold" : "normal" }}>{d > 0 ? "+" : ""}{d.toFixed(0)}%</span>;
+              }},
+              { id: "status", header: "Status", cell: (r) =>
+                r.regression ? <StatusIndicator type="error">Regression</StatusIndicator> :
+                r.passed ? <StatusIndicator type="success">Passed</StatusIndicator> :
+                <StatusIndicator type="warning">Mismatch</StatusIndicator>,
+              },
+            ]}
+            items={results}
+          />
         )}
       </SpaceBetween>
     </ContentLayout>
