@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
   const [currentQuery, setCurrentQuery] = useState("");
+  const [currentRunId, setCurrentRunId] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -57,6 +58,10 @@ export default function DashboardPage() {
     setResults([]);
     setProgress(0);
     setElapsed(0);
+
+    // Generate unique run_id for this session
+    const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    setCurrentRunId(runId);
 
     const startTime = Date.now();
     timerRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 500);
@@ -72,7 +77,7 @@ export default function DashboardPage() {
           setProgress(Math.round((completed / totalQueries) * 100));
 
           try {
-            const resp = await api.simulate([{ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql }]);
+            const resp = await api.simulate([{ oracle_sql: q.oracle_sql, pg_sql: q.pg_sql }], runId);
             const r = resp.results?.[0];
             if (r) {
               const mapped: QueryResult = {

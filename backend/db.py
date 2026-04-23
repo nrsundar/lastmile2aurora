@@ -78,7 +78,9 @@ def init_schema():
                     row_count_match BOOLEAN,
                     data_match BOOLEAN,
                     explain_plan JSONB,
-                    alert_level VARCHAR(10) DEFAULT 'ok'
+                    alert_level VARCHAR(10) DEFAULT 'ok',
+                    run_id VARCHAR(100) DEFAULT '',
+                    user_sub VARCHAR(100) DEFAULT ''
                 );
 
                 CREATE TABLE IF NOT EXISTS lm_remediations (
@@ -102,7 +104,9 @@ def init_schema():
                     severity VARCHAR(10) NOT NULL,
                     message TEXT NOT NULL,
                     acknowledged BOOLEAN DEFAULT FALSE,
-                    acknowledged_by VARCHAR(100)
+                    acknowledged_by VARCHAR(100),
+                    run_id VARCHAR(100) DEFAULT '',
+                    user_sub VARCHAR(100) DEFAULT ''
                 );
             """)
         conn.commit()

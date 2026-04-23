@@ -109,6 +109,7 @@ class ExecuteRequest(BaseModel):
     oracle_sql: str
     pg_sql: str
     source_dialect: str = "oracle"
+    run_id: Optional[str] = None
 
 
 @app.post("/api/execute-compare")
@@ -129,7 +130,7 @@ async def api_execute_compare(req: ExecuteRequest, user: dict = Depends(get_curr
 
     # Store snapshot
     qh = query_hash(req.oracle_sql)
-    _store_snapshot(qh, req.oracle_sql, req.pg_sql, oracle_result, pg_result, diff)
+    _store_snapshot(qh, req.oracle_sql, req.pg_sql, oracle_result, pg_result, diff, user.get("sub", ""), req.run_id)
 
     # Broadcast to WebSocket clients
     event = {
@@ -193,22 +194,31 @@ async def api_remediate(req: RemediateRequest, user: dict = Depends(get_current_
 # Dashboard data — monitored queries, snapshots, alerts
 # ═══════════════════════════════════════════════════════════════════
 @app.get("/api/queries")
-async def api_list_queries(user: dict = Depends(get_current_user)):
+async def api_list_queries(run_id: Optional[str] = None, user: dict = Depends(get_current_user)):
     conn = get_pool().getconn()
     try:
         with conn.cursor() as cur:
-            cur.execute("""
-                SELECT q.id, q.query_hash, q.original_sql, q.translated_sql, q.status,
-                       q.execution_count, q.last_seen,
-                       s.source_ms, s.target_ms, s.delta_pct, s.alert_level
-                FROM lm_monitored_queries q
-                LEFT JOIN LATERAL (
-                    SELECT source_ms, target_ms, delta_pct, alert_level
-                    FROM lm_performance_snapshots
-                    WHERE query_id = q.id ORDER BY captured_at DESC LIMIT 1
-                ) s ON true
-                ORDER BY q.last_seen DESC LIMIT 100
-            """)
+            if run_id:
+                cur.execute("""
+                    SELECT q.id, q.query_hash, q.original_sql, q.translated_sql, q.status,
+                           q.execution_count, q.last_seen,
+                           s.source_ms, s.target_ms, s.delta_pct, s.alert_level, s.run_id
+                    FROM lm_monitored_queries q
+                    JOIN lm_performance_snapshots s ON s.query_id = q.id AND s.run_id = %s
+                    ORDER BY s.captured_at DESC LIMIT 100
+                """, (run_id,))
+            else:
+                cur.execute("""
+                    SELECT q.id, q.query_hash, q.original_sql, q.translated_sql, q.status,
+                           q.execution_count, q.last_seen,
+                           s.source_ms, s.target_ms, s.delta_pct, s.alert_level, s.run_id
+                    FROM lm_monitored_queries q
+                    LEFT JOIN LATERAL (
+                        SELECT source_ms, target_ms, delta_pct, alert_level, run_id
+                        FROM lm_performance_snapshots WHERE query_id = q.id ORDER BY captured_at DESC LIMIT 1
+                    ) s ON true
+                    ORDER BY q.last_seen DESC LIMIT 100
+                """)
             cols = [d[0] for d in cur.description]
             return [dict(zip(cols, r)) for r in cur.fetchall()]
     finally:
@@ -216,17 +226,22 @@ async def api_list_queries(user: dict = Depends(get_current_user)):
 
 
 @app.get("/api/alerts")
-async def api_list_alerts(user: dict = Depends(get_current_user)):
+async def api_list_alerts(run_id: Optional[str] = None, user: dict = Depends(get_current_user)):
     conn = get_pool().getconn()
     try:
         with conn.cursor() as cur:
-            cur.execute("""
-                SELECT a.*, q.original_sql, q.query_hash
-                FROM lm_alerts a
-                JOIN lm_monitored_queries q ON q.id = a.query_id
-                WHERE a.acknowledged = FALSE
-                ORDER BY a.created_at DESC LIMIT 50
-            """)
+            if run_id:
+                cur.execute("""
+                    SELECT a.*, q.original_sql, q.query_hash
+                    FROM lm_alerts a JOIN lm_monitored_queries q ON q.id = a.query_id
+                    WHERE a.run_id = %s ORDER BY a.created_at DESC LIMIT 50
+                """, (run_id,))
+            else:
+                cur.execute("""
+                    SELECT a.*, q.original_sql, q.query_hash
+                    FROM lm_alerts a JOIN lm_monitored_queries q ON q.id = a.query_id
+                    WHERE a.acknowledged = FALSE ORDER BY a.created_at DESC LIMIT 50
+                """)
             cols = [d[0] for d in cur.description]
             return [dict(zip(cols, r)) for r in cur.fetchall()]
     finally:
@@ -255,10 +270,12 @@ async def api_list_remediations(user: dict = Depends(get_current_user)):
 # ═══════════════════════════════════════════════════════════════════
 class SimulateRequest(BaseModel):
     queries: list[dict]  # [{oracle_sql, pg_sql}]
+    run_id: Optional[str] = None
 
 
 @app.post("/api/simulate")
 async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_user)):
+    run_id = req.run_id or f"run_{int(time.time())}_{user.get('sub', 'anon')[:8]}"
     results = []
     for q in req.queries:
         oracle_sql = q.get("oracle_sql", "")
@@ -277,11 +294,12 @@ async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_us
 
         diff = deep_diff(oracle_result, pg_result)
         qh = query_hash(oracle_sql)
-        _store_snapshot(qh, oracle_sql, pg_sql, oracle_result, pg_result, diff)
+        _store_snapshot(qh, oracle_sql, pg_sql, oracle_result, pg_result, diff, user.get("sub", ""), run_id)
 
         await _broadcast({
             "type": "query_compared",
             "query_hash": qh,
+            "run_id": run_id,
             "oracle_ms": oracle_result.get("execution_time_ms", 0),
             "pg_ms": pg_result.get("execution_time_ms", 0),
             "passed": diff["passed"],
@@ -289,13 +307,13 @@ async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_us
         })
 
         results.append({"query_hash": qh, "passed": diff["passed"], "diff_summary": diff["checks"]})
-    return {"count": len(results), "results": results}
+    return {"count": len(results), "results": results, "run_id": run_id}
 
 
 # ═══════════════════════════════════════════════════════════════════
 # Internal helpers
 # ═══════════════════════════════════════════════════════════════════
-def _store_snapshot(qh, oracle_sql, pg_sql, oracle_result, pg_result, diff):
+def _store_snapshot(qh, oracle_sql, pg_sql, oracle_result, pg_result, diff, user_sub="", run_id=""):
     try:
         conn = get_pool().getconn()
         try:
@@ -320,19 +338,20 @@ def _store_snapshot(qh, oracle_sql, pg_sql, oracle_result, pg_result, diff):
 
                 cur.execute("""
                     INSERT INTO lm_performance_snapshots
-                    (query_id, source_ms, target_ms, delta_ms, delta_pct, row_count_match, data_match, alert_level)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (query_id, source_ms, target_ms, delta_ms, delta_pct, row_count_match, data_match, alert_level, run_id, user_sub)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (query_id, src_ms, tgt_ms, delta, delta_pct,
                       diff["checks"].get("row_count", {}).get("passed", False),
                       diff["checks"].get("cell_comparison", {}).get("passed", False),
-                      alert_level))
+                      alert_level, run_id, user_sub))
 
                 if alert_level != "ok":
                     cur.execute("""
-                        INSERT INTO lm_alerts (query_id, alert_type, severity, message)
-                        VALUES (%s, %s, %s, %s)
+                        INSERT INTO lm_alerts (query_id, alert_type, severity, message, run_id, user_sub)
+                        VALUES (%s, %s, %s, %s, %s, %s)
                     """, (query_id, "performance_regression", alert_level,
-                          f"Query {qh} is {abs(delta_pct):.0f}% {'slower' if delta_pct > 0 else 'faster'} on Aurora PG"))
+                          f"Query {qh} is {abs(delta_pct):.0f}% {'slower' if delta_pct > 0 else 'faster'} on Aurora PG",
+                          run_id, user_sub))
 
             conn.commit()
         finally:

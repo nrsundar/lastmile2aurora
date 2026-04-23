@@ -13,10 +13,10 @@ async function request(path: string, options: RequestInit = {}) {
 export const api = {
   health: () => request("/api/health"),
   translate: (sql: string, dialect = "oracle") => request("/api/translate", { method: "POST", body: JSON.stringify({ sql, source_dialect: dialect }) }),
-  executeCompare: (oracle_sql: string, pg_sql: string) => request("/api/execute-compare", { method: "POST", body: JSON.stringify({ oracle_sql, pg_sql }) }),
+  executeCompare: (oracle_sql: string, pg_sql: string, runId?: string) => request("/api/execute-compare", { method: "POST", body: JSON.stringify({ oracle_sql, pg_sql, run_id: runId }) }),
   remediate: (sql: string, auto_apply = false) => request("/api/remediate", { method: "POST", body: JSON.stringify({ sql, auto_apply }) }),
-  simulate: (queries: { oracle_sql: string; pg_sql: string }[]) => request("/api/simulate", { method: "POST", body: JSON.stringify({ queries }) }),
-  queries: () => request("/api/queries"),
-  alerts: () => request("/api/alerts"),
-  remediations: () => request("/api/remediations"),
+  simulate: (queries: { oracle_sql: string; pg_sql: string }[], runId?: string) => request("/api/simulate", { method: "POST", body: JSON.stringify({ queries, run_id: runId }) }),
+  queries: (runId?: string) => request(`/api/queries${runId ? `?run_id=${runId}` : ""}`),
+  alerts: (runId?: string) => request(`/api/alerts${runId ? `?run_id=${runId}` : ""}`),
+  remediations: (runId?: string) => request(`/api/remediations${runId ? `?run_id=${runId}` : ""}`),
 };
