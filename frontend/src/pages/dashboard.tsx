@@ -63,6 +63,11 @@ export default function DashboardPage() {
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     setCurrentRunId(runId);
 
+    // Save to localStorage so Reports page can find it
+    const stored = JSON.parse(localStorage.getItem("lm_run_ids") || "[]") as string[];
+    stored.unshift(runId);
+    localStorage.setItem("lm_run_ids", JSON.stringify(stored.slice(0, 20))); // Keep last 20
+
     const startTime = Date.now();
     timerRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 500);
 
