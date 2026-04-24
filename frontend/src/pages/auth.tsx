@@ -212,16 +212,6 @@ export default function AuthPage() {
                   </SpaceBetween>
                 </Form>
               )},
-              { id: "signup", label: "Create Account", content: (
-                <Form actions={<Button variant="primary" loading={loading} onClick={handleSignUp} fullWidth>Create Account</Button>}>
-                  <SpaceBetween size="l">
-                    <Alert type="info">Only <b>@amazon.com</b> email addresses can register.</Alert>
-                    <FormField label="Full Name"><Input value={name} onChange={({ detail }) => setName(detail.value)} placeholder="Your Name" /></FormField>
-                    <FormField label="Email"><Input value={email} onChange={({ detail }) => setEmail(detail.value)} type="email" placeholder="alias@amazon.com" /></FormField>
-                    <FormField label="Password" description="Min 8 chars, uppercase, lowercase, number"><Input value={password} onChange={({ detail }) => setPassword(detail.value)} type="password" /></FormField>
-                  </SpaceBetween>
-                </Form>
-              )},
               { id: "confirm", label: "Verify Email", content: (
                 <Form actions={<Button variant="primary" loading={loading} onClick={handleConfirm} fullWidth>Verify</Button>}>
                   <SpaceBetween size="l">
