@@ -23,6 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             user
               ? [
                   { type: "button", text: "Dashboard", onClick: () => navigate("/dashboard") },
+                  { type: "button", text: "Presentation", onClick: () => window.open("/presentation.html", "_blank") },
                   {
                     type: "menu-dropdown",
                     text: user.email,
@@ -30,7 +31,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     onItemClick: () => { logout(); navigate("/"); },
                   },
                 ]
-              : []
+              : [
+                  { type: "button", text: "Presentation", onClick: () => window.open("/presentation.html", "_blank") },
+                ]
           }
         />
       </div>
