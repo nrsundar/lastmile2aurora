@@ -12,7 +12,7 @@ def get_pool() -> pool.ThreadedConnectionPool:
     if _pool is None:
         _pool = pool.ThreadedConnectionPool(
             minconn=2,
-            maxconn=10,
+            maxconn=20,
             host=settings.pg_host,
             port=settings.pg_port,
             database=settings.pg_database,
