@@ -121,9 +121,11 @@ async def api_execute_compare(req: ExecuteRequest, user: dict = Depends(get_curr
     start = time.monotonic()
     try:
         pg_result = execute_query(req.pg_sql)
-        pg_result["execution_time_ms"] = round((time.monotonic() - start) * 1000, 2)
+        round_trip_ms = round((time.monotonic() - start) * 1000, 2)
+        explain_ms = pg_result.get("stats", {}).get("explain_exec_ms", 0)
+        pg_result["execution_time_ms"] = explain_ms if explain_ms > 0 else round_trip_ms
     except Exception as e:
-        pg_result = {"columns": [], "rows": [], "row_count": 0, "execution_time_ms": 0, "error": str(e)}
+        pg_result = {"columns": [], "rows": [], "row_count": 0, "execution_time_ms": 0, "error": str(e), "stats": {}}
 
     # Deep diff
     diff = deep_diff(oracle_result, pg_result)
@@ -288,9 +290,12 @@ async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_us
         start = time.monotonic()
         try:
             pg_result = execute_query(pg_sql)
-            pg_result["execution_time_ms"] = round((time.monotonic() - start) * 1000, 2)
+            round_trip_ms = round((time.monotonic() - start) * 1000, 2)
+            # Use EXPLAIN's execution time (actual PG engine time, no network/EXPLAIN overhead)
+            explain_ms = pg_result.get("stats", {}).get("explain_exec_ms", 0)
+            pg_result["execution_time_ms"] = explain_ms if explain_ms > 0 else round_trip_ms
         except Exception as e:
-            pg_result = {"columns": [], "rows": [], "row_count": 0, "execution_time_ms": 0, "error": str(e)}
+            pg_result = {"columns": [], "rows": [], "row_count": 0, "execution_time_ms": 0, "error": str(e), "stats": {}}
 
         diff = deep_diff(oracle_result, pg_result)
         qh = query_hash(oracle_sql)

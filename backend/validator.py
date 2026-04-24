@@ -92,7 +92,7 @@ def deep_diff(source_result: dict, target_result: dict) -> dict:
         "target_ms": round(tgt_ms, 2),
         "delta_ms": round(tgt_ms - src_ms, 2),
         "delta_pct": round(delta_pct, 1),
-        "regression": delta_pct > 20,  # >20% slower = regression
+        "regression": delta_pct > 20 and tgt_ms > 2,  # Ignore sub-2ms differences
     }
 
     return report

@@ -27,23 +27,25 @@ def execute_query(sql: str, params=None) -> dict:
     """Execute a query against Aurora PG and return results + EXPLAIN stats."""
     conn = get_pool().getconn()
     try:
-        # Get EXPLAIN ANALYZE with buffers
+        # Get EXPLAIN ANALYZE with buffers (captures real execution time inside PG)
         explain = None
-        pg_stats = {"shared_blks_read": 0, "shared_blks_hit": 0, "rows_returned": 0}
+        pg_stats = {"shared_blks_read": 0, "shared_blks_hit": 0, "rows_returned": 0, "explain_exec_ms": 0, "planning_ms": 0}
         try:
             with conn.cursor() as cur:
                 cur.execute("SET statement_timeout = '30s'")
                 cur.execute(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {sql}", params)
                 explain = cur.fetchone()[0]
-                # Parse top-level plan stats
                 if explain and isinstance(explain, list) and len(explain) > 0:
                     plan = explain[0].get("Plan", {})
                     pg_stats["shared_blks_read"] = plan.get("Shared Read Blocks", 0) or 0
                     pg_stats["shared_blks_hit"] = plan.get("Shared Hit Blocks", 0) or 0
                     pg_stats["rows_returned"] = plan.get("Actual Rows", 0) or 0
+                    pg_stats["explain_exec_ms"] = round(explain[0].get("Execution Time", 0) or 0, 3)
+                    pg_stats["planning_ms"] = round(explain[0].get("Planning Time", 0) or 0, 3)
         except Exception:
             conn.rollback()
 
+        # Execute actual query for result rows
         with conn.cursor() as cur:
             cur.execute(sql, params)
             if cur.description:
