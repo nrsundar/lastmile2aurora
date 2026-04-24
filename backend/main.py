@@ -306,7 +306,13 @@ async def api_simulate(req: SimulateRequest, user: dict = Depends(get_current_us
             "regression": diff["checks"].get("performance", {}).get("regression", False),
         })
 
-        results.append({"query_hash": qh, "passed": diff["passed"], "diff_summary": diff["checks"]})
+        results.append({
+            "query_hash": qh,
+            "passed": diff["passed"],
+            "diff_summary": diff["checks"],
+            "oracle_stats": oracle_result.get("stats", {}),
+            "pg_stats": pg_result.get("stats", {}),
+        })
     return {"count": len(results), "results": results, "run_id": run_id}
 
 

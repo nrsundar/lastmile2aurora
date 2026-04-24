@@ -28,6 +28,8 @@ interface QueryResult {
   pg_ms?: number;
   oracle_sql?: string;
   pg_sql?: string;
+  oracle_stats?: { disk_reads?: number; buffer_gets?: number; rows_processed?: number };
+  pg_stats?: { shared_blks_read?: number; shared_blks_hit?: number; rows_returned?: number };
 }
 
 export default function DashboardPage() {
@@ -102,6 +104,8 @@ export default function DashboardPage() {
                 pg_ms: r.diff_summary?.performance?.target_ms,
                 oracle_sql: q.oracle_sql,
                 pg_sql: q.pg_sql,
+                oracle_stats: r.oracle_stats,
+                pg_stats: r.pg_stats,
               };
               setResults((prev) => [mapped, ...prev]);
             }
@@ -316,6 +320,16 @@ export default function DashboardPage() {
                 if (!r.oracle_ms || !r.pg_ms) return "—";
                 const d = ((r.pg_ms - r.oracle_ms) / r.oracle_ms * 100);
                 return <span style={{ color: d > 20 ? "#d32f2f" : d < -10 ? "#2e7d32" : "#666", fontWeight: Math.abs(d) > 20 ? "bold" : "normal" }}>{d > 0 ? "+" : ""}{d.toFixed(0)}%</span>;
+              }},
+              { id: "ora_io", header: "Oracle Blocks", cell: (r) => {
+                const s = r.oracle_stats;
+                if (!s) return "—";
+                return <span title={`Disk: ${s.disk_reads ?? 0}, Buffer: ${s.buffer_gets ?? 0}`}>{s.disk_reads ?? 0} / {s.buffer_gets ?? 0}</span>;
+              }},
+              { id: "pg_io", header: "PG Pages", cell: (r) => {
+                const s = r.pg_stats;
+                if (!s) return "—";
+                return <span title={`Read: ${s.shared_blks_read ?? 0}, Hit: ${s.shared_blks_hit ?? 0}`}>{s.shared_blks_read ?? 0} / {s.shared_blks_hit ?? 0}</span>;
               }},
               { id: "status", header: "Status", cell: (r) =>
                 r.regression ? <StatusIndicator type="error">Regression</StatusIndicator> :

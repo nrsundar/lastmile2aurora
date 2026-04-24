@@ -24,13 +24,25 @@ def get_pool() -> pool.ThreadedConnectionPool:
 
 
 def execute_query(sql: str, params=None) -> dict:
-    """Execute a query against Aurora PG and return results + metadata."""
+    """Execute a query against Aurora PG and return results + EXPLAIN stats."""
     conn = get_pool().getconn()
     try:
-        with conn.cursor() as cur:
-            cur.execute("SET statement_timeout = '30s'")
-            cur.execute(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {sql}", params)
-            explain = cur.fetchone()[0]
+        # Get EXPLAIN ANALYZE with buffers
+        explain = None
+        pg_stats = {"shared_blks_read": 0, "shared_blks_hit": 0, "rows_returned": 0}
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SET statement_timeout = '30s'")
+                cur.execute(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {sql}", params)
+                explain = cur.fetchone()[0]
+                # Parse top-level plan stats
+                if explain and isinstance(explain, list) and len(explain) > 0:
+                    plan = explain[0].get("Plan", {})
+                    pg_stats["shared_blks_read"] = plan.get("Shared Read Blocks", 0) or 0
+                    pg_stats["shared_blks_hit"] = plan.get("Shared Hit Blocks", 0) or 0
+                    pg_stats["rows_returned"] = plan.get("Actual Rows", 0) or 0
+        except Exception:
+            conn.rollback()
 
         with conn.cursor() as cur:
             cur.execute(sql, params)
@@ -42,8 +54,9 @@ def execute_query(sql: str, params=None) -> dict:
                     "rows": [dict(zip(columns, r)) for r in rows],
                     "row_count": len(rows),
                     "explain": explain,
+                    "stats": pg_stats,
                 }
-            return {"columns": [], "rows": [], "row_count": 0, "explain": explain}
+            return {"columns": [], "rows": [], "row_count": 0, "explain": explain, "stats": pg_stats}
     finally:
         get_pool().putconn(conn)
 
