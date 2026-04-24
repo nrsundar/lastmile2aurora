@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # AWS
     aws_region: str = "us-east-1"
-    bedrock_model: str = "us.anthropic.claude-sonnet-4-20250514"
+    bedrock_model: str = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
     # Cognito
     cognito_user_pool_id: str = ""
