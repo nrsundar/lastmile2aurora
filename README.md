@@ -314,9 +314,10 @@ aws cloudfront delete-distribution --id EN5DGHAHCX85H --if-match <etag>
 
 | # | Feature | Description | Impact |
 |---|---------|-------------|--------|
-| 1 | **Tag Auto-Injector** | CLI that scans source files (Python, Java, Go), finds SQL literals, and auto-injects stable tags derived from query shape hash. `lastmile2aurora tag ./src/` — 60-second command. Removes the manual tagging burden. | Turns a manual ritual into automation |
-| 2 | **Regression Root-Cause Narrative** | When regression detected, LLM fetches both execution plans, compares them, returns: plain-English diagnosis, suspected root cause (missing index, stale stats, plan quirk), specific remediation (`CREATE INDEX ...`), and expected impact estimate. | Turns detector into consultant |
-| 3 | **Pre-Cutover Readiness Scorecard** | Holistic confidence score (0-100): % queries passing, un-remediated regressions, data volume parity, coverage %, critical-path query status. "Ready to Cut Over" traffic-light badge. Expose as API for CI/CD gating. | Single number for leadership approval |
+| 1 | **Apply & Verify AI Fix** | After AI generates a rewritten SQL, user clicks "Apply & Verify". Backend runs both original and rewritten SQL against Aurora PG, compares execution time, blocks read, and row count. Shows before/after diff. If better → "Applied ✅". If worse → "Rejected ❌". Closes the loop from detection to verified fix. | Proves the AI fix actually works — not just suggested |
+| 2 | **Tag Auto-Injector** | CLI that scans source files (Python, Java, Go), finds SQL literals, and auto-injects stable tags derived from query shape hash. `lastmile2aurora tag ./src/` — 60-second command. Removes the manual tagging burden. | Turns a manual ritual into automation |
+| 3 | **Regression Root-Cause Narrative** | When regression detected, LLM fetches both execution plans, compares them, returns: plain-English diagnosis, suspected root cause (missing index, stale stats, plan quirk), specific remediation (`CREATE INDEX ...`), and expected impact estimate. | Turns detector into consultant |
+| 4 | **Pre-Cutover Readiness Scorecard** | Holistic confidence score (0-100): % queries passing, un-remediated regressions, data volume parity, coverage %, critical-path query status. "Ready to Cut Over" traffic-light badge. Expose as API for CI/CD gating. | Single number for leadership approval |
 
 ### 🔧 Expand Dialect & Workload Surface
 
