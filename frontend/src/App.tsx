@@ -7,6 +7,7 @@ import DashboardPage from "./pages/dashboard";
 import TranslatePage from "./pages/translate";
 import ReportPage from "./pages/report";
 import AdminPage from "./pages/admin";
+import PresentationPage from "./pages/presentation";
 import Box from "@cloudscape-design/components/box";
 import Spinner from "@cloudscape-design/components/spinner";
 
@@ -30,6 +31,7 @@ function AppRouter() {
           <Route path="/translate">{() => <ProtectedRoute component={TranslatePage} />}</Route>
           <Route path="/report">{() => <ProtectedRoute component={ReportPage} />}</Route>
           <Route path="/admin">{() => <ProtectedRoute component={AdminPage} />}</Route>
+          <Route path="/presentation" component={PresentationPage} />
         </Switch>
       </AppLayout>
     </Router>

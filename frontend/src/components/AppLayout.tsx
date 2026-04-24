@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             user
               ? [
                   { type: "button", text: "Dashboard", onClick: () => navigate("/dashboard") },
-                  { type: "button", text: "Presentation", onClick: () => window.open("/presentation.html", "_blank") },
+                  { type: "button", text: "Presentation", onClick: () => navigate("/presentation") },
                   {
                     type: "menu-dropdown",
                     text: user.email,
@@ -32,7 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   },
                 ]
               : [
-                  { type: "button", text: "Presentation", onClick: () => window.open("/presentation.html", "_blank") },
+                  { type: "button", text: "Presentation", onClick: () => navigate("/presentation") },
                 ]
           }
         />
