@@ -53,6 +53,9 @@ export default function DashboardPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [fixingQuery, setFixingQuery] = useState<string | null>(null);
   const [fixResult, setFixResult] = useState<any>(null);
+  const [fixingAll, setFixingAll] = useState(false);
+  const [fixProgress, setFixProgress] = useState("");
+  const [allFixes, setAllFixes] = useState<any[]>([]);
 
   // Cleanup timer
   useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
@@ -128,13 +131,37 @@ export default function DashboardPage() {
     const sql = r.pg_sql || r.oracle_sql || "";
     setFixingQuery(r.query_hash);
     setFixResult(null);
+    setFixProgress(`Analyzing execution plan for "${r.name}"...`);
     try {
       const resp = await api.remediate(sql);
-      setFixResult(resp);
+      setFixResult({ ...resp, queryName: r.name });
     } catch (e: any) {
       setFixResult({ error: e.message || "Failed to get AI fix" });
     }
     setFixingQuery(null);
+    setFixProgress("");
+  };
+
+  const handleFixAll = async () => {
+    const toFix = results.filter((r) => r.regression || !r.passed);
+    if (toFix.length === 0) return;
+    setFixingAll(true);
+    setAllFixes([]);
+    for (let i = 0; i < toFix.length; i++) {
+      const r = toFix[i];
+      const sql = r.pg_sql || r.oracle_sql || "";
+      setFixingQuery(r.query_hash);
+      setFixProgress(`Fixing ${i + 1} of ${toFix.length}: "${r.name}"...`);
+      try {
+        const resp = await api.remediate(sql);
+        setAllFixes((prev) => [...prev, { ...resp, queryName: r.name }]);
+      } catch (e: any) {
+        setAllFixes((prev) => [...prev, { error: e.message, queryName: r.name }]);
+      }
+    }
+    setFixingQuery(null);
+    setFixingAll(false);
+    setFixProgress("");
   };
 
   // Mode selection
@@ -268,7 +295,16 @@ export default function DashboardPage() {
         {results.length > 0 && (
           <Table
             header={
-              <Header variant="h2" counter={`(${results.length})`} actions={!simulating ? <Button onClick={() => setResults([])}>Run Again</Button> : undefined}>
+              <Header variant="h2" counter={`(${results.length})`} actions={
+                <SpaceBetween direction="horizontal" size="s">
+                  {!simulating && regressions.length + failed.length > 0 && (
+                    <Button onClick={handleFixAll} loading={fixingAll} iconName="gen-ai" variant="primary">
+                      AI Fix All ({regressions.length + failed.length})
+                    </Button>
+                  )}
+                  {!simulating && <Button onClick={() => { setResults([]); setAllFixes([]); setFixResult(null); }}>Run Again</Button>}
+                </SpaceBetween>
+              }>
                 Query Results — {workloadSize.charAt(0).toUpperCase() + workloadSize.slice(1)} Workload
               </Header>
             }
@@ -298,7 +334,17 @@ export default function DashboardPage() {
           />
         )}
 
-        {/* AI Fix Result Panel */}
+        {/* AI Fix Progress */}
+        {fixProgress && (
+          <div style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", borderRadius: "12px", padding: "20px 32px", color: "white" }}>
+            <SpaceBetween size="xs" direction="horizontal" alignItems="center">
+              <StatusIndicator type="in-progress">{fixProgress}</StatusIndicator>
+              {fixingAll && <Box color="text-body-secondary">Amazon Bedrock (Claude) is analyzing execution plans and rewriting queries...</Box>}
+            </SpaceBetween>
+          </div>
+        )}
+
+        {/* AI Fix Result Panel — single query */}
         {fixResult && (
           <Container header={<Header variant="h2" actions={<Button onClick={() => setFixResult(null)} iconName="close">Dismiss</Button>}>AI-Powered Query Fix</Header>}>
             {fixResult.error ? (
@@ -329,6 +375,37 @@ export default function DashboardPage() {
                 )}
               </SpaceBetween>
             )}
+          </Container>
+        )}
+        {/* Batch Fix Results */}
+        {allFixes.length > 0 && (
+          <Container header={<Header variant="h2" counter={`(${allFixes.length})`}>Batch AI Fix Results</Header>}>
+            <SpaceBetween size="l">
+              {allFixes.map((fix, i) => (
+                <div key={i} style={{ background: fix.error ? "#1e293b" : "#0f2e1a", borderRadius: "8px", padding: "16px", borderLeft: fix.error ? "4px solid #f87171" : "4px solid #4ade80" }}>
+                  <SpaceBetween size="s">
+                    <Box variant="h4" color={fix.error ? "text-status-error" : "text-status-success"}>
+                      {fix.error ? "❌" : "✅"} {fix.queryName}
+                    </Box>
+                    {fix.error ? (
+                      <Box color="text-status-error">{fix.error}</Box>
+                    ) : (
+                      <ColumnLayout columns={2}>
+                        <div>
+                          <Box variant="awsui-key-label">Original</Box>
+                          <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#f87171", marginTop: "4px" }}>{fix.original?.slice(0, 120)}...</div>
+                        </div>
+                        <div>
+                          <Box variant="awsui-key-label">AI Rewrite</Box>
+                          <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#4ade80", marginTop: "4px" }}>{fix.rewritten?.slice(0, 120)}...</div>
+                        </div>
+                      </ColumnLayout>
+                    )}
+                    {fix.rationale && <Box color="text-body-secondary" fontSize="body-s">{fix.rationale}</Box>}
+                  </SpaceBetween>
+                </div>
+              ))}
+            </SpaceBetween>
           </Container>
         )}
       </SpaceBetween>
