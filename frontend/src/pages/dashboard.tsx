@@ -9,6 +9,7 @@ import Button from "@cloudscape-design/components/button";
 import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Alert from "@cloudscape-design/components/alert";
+import Badge from "@cloudscape-design/components/badge";
 import Tiles from "@cloudscape-design/components/tiles";
 import FormField from "@cloudscape-design/components/form-field";
 import Input from "@cloudscape-design/components/input";
@@ -25,6 +26,8 @@ interface QueryResult {
   regression?: boolean;
   oracle_ms?: number;
   pg_ms?: number;
+  oracle_sql?: string;
+  pg_sql?: string;
 }
 
 export default function DashboardPage() {
@@ -48,6 +51,8 @@ export default function DashboardPage() {
   const [currentRunId, setCurrentRunId] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [fixingQuery, setFixingQuery] = useState<string | null>(null);
+  const [fixResult, setFixResult] = useState<any>(null);
 
   // Cleanup timer
   useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
@@ -92,6 +97,8 @@ export default function DashboardPage() {
                 regression: r.diff_summary?.performance?.regression,
                 oracle_ms: r.diff_summary?.performance?.source_ms,
                 pg_ms: r.diff_summary?.performance?.target_ms,
+                oracle_sql: q.oracle_sql,
+                pg_sql: q.pg_sql,
               };
               setResults((prev) => [mapped, ...prev]);
             }
@@ -116,6 +123,19 @@ export default function DashboardPage() {
   const passed = results.filter((r) => r.passed && !r.regression);
   const failed = results.filter((r) => !r.passed && !r.regression);
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const handleAIFix = async (r: QueryResult) => {
+    const sql = r.pg_sql || r.oracle_sql || "";
+    setFixingQuery(r.query_hash);
+    setFixResult(null);
+    try {
+      const resp = await api.remediate(sql);
+      setFixResult(resp);
+    } catch (e: any) {
+      setFixResult({ error: e.message || "Failed to get AI fix" });
+    }
+    setFixingQuery(null);
+  };
 
   // Mode selection
   if (!mode) {
@@ -266,9 +286,50 @@ export default function DashboardPage() {
                 r.passed ? <StatusIndicator type="success">Passed</StatusIndicator> :
                 <StatusIndicator type="warning">Mismatch</StatusIndicator>,
               },
+              { id: "action", header: "Action", cell: (r) =>
+                (r.regression || !r.passed) ? (
+                  <Button variant="inline-link" loading={fixingQuery === r.query_hash} onClick={() => handleAIFix(r)} iconName="gen-ai">
+                    AI Fix
+                  </Button>
+                ) : <span style={{ color: "#4ade80" }}>—</span>
+              },
             ]}
             items={results}
           />
+        )}
+
+        {/* AI Fix Result Panel */}
+        {fixResult && (
+          <Container header={<Header variant="h2" actions={<Button onClick={() => setFixResult(null)} iconName="close">Dismiss</Button>}>AI-Powered Query Fix</Header>}>
+            {fixResult.error ? (
+              <Alert type="error">{fixResult.error}</Alert>
+            ) : (
+              <SpaceBetween size="l">
+                <ColumnLayout columns={2}>
+                  <SpaceBetween size="xs">
+                    <Box variant="h4">Original SQL</Box>
+                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#1e293b", color: "#f87171", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
+                      {fixResult.original}
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween size="xs">
+                    <Box variant="h4">Rewritten SQL (AI Fix)</Box>
+                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#0f2e1a", color: "#4ade80", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
+                      {fixResult.rewritten}
+                    </div>
+                  </SpaceBetween>
+                </ColumnLayout>
+                <Container header={<Header variant="h3">Rationale</Header>}>
+                  <Box>{fixResult.rationale}</Box>
+                </Container>
+                {fixResult.changes?.length > 0 && (
+                  <Container header={<Header variant="h3">Changes Applied</Header>}>
+                    <ul>{fixResult.changes.map((c: string, i: number) => <li key={i}>{c}</li>)}</ul>
+                  </Container>
+                )}
+              </SpaceBetween>
+            )}
+          </Container>
         )}
       </SpaceBetween>
     </ContentLayout>
