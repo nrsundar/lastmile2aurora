@@ -30,7 +30,11 @@ phases:
   build:
     commands:
       - echo "--- Building frontend (vite) ---"
-      - cd frontend && LM_BUILD_ID="$(echo "${CODEBUILD_BUILD_ID}" | awk -F: '{print $2}' | cut -c1-8)" LM_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" npx vite build && cd ..
+      - |
+        cd frontend && \
+        LM_BUILD_ID=$(echo "$CODEBUILD_BUILD_ID" | awk -F: '{print $2}' | cut -c1-8) \
+        LM_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+        npx vite build && cd ..
       - echo "--- Building Docker image ---"
       - docker build -t "$ECR_REPO:$IMAGE_TAG" .
       - docker tag "$ECR_REPO:$IMAGE_TAG" "$IMAGE_URI:$IMAGE_TAG"
