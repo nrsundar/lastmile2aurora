@@ -49,7 +49,7 @@ class OracleExecutor:
                 rows = [dict(zip(columns, r)) for r in cur.fetchall()]
             else:
                 columns, rows = [], []
-            elapsed = (time.monotonic() - start) * 1000
+            wall_ms = (time.monotonic() - start) * 1000
 
             # Capture session stats after execution
             stats_after = self._get_session_stats(conn)
@@ -59,16 +59,22 @@ class OracleExecutor:
             buffer_gets = (stats_after.get("session logical reads", 0) - stats_before.get("session logical reads", 0))
             rows_processed = len(rows)
 
+            # Engine-only time from V$SQL.elapsed_time (microseconds) for fair comparison with PG's Execution Time
+            engine_ms = self._get_engine_elapsed_ms(conn, sql)
+            reported_ms = engine_ms if engine_ms is not None else wall_ms
+
             return {
                 "columns": columns,
                 "rows": rows,
                 "row_count": len(rows),
-                "execution_time_ms": round(elapsed, 2),
+                "execution_time_ms": round(reported_ms, 2),
                 "source": "oracle_rds",
                 "stats": {
                     "disk_reads": blocks_read,
                     "buffer_gets": buffer_gets,
                     "rows_processed": rows_processed,
+                    "wall_ms": round(wall_ms, 2),
+                    "engine_ms": round(engine_ms, 2) if engine_ms is not None else None,
                 },
             }
         except Exception as e:
@@ -81,6 +87,27 @@ class OracleExecutor:
             }
         finally:
             cur.close()
+
+    def _get_engine_elapsed_ms(self, conn, sql: str):
+        """Read V$SQL.elapsed_time (microseconds) for the most recent execution of this SQL in our session.
+        Returns engine-internal time in ms (no network), or None on failure."""
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT elapsed_time
+                FROM V$SQL s
+                WHERE s.sql_id = (
+                    SELECT prev_sql_id FROM V$SESSION WHERE sid = SYS_CONTEXT('USERENV', 'SID')
+                )
+                AND ROWNUM = 1
+            """)
+            row = cur.fetchone()
+            cur.close()
+            if row and row[0] is not None:
+                return float(row[0]) / 1000.0  # microseconds → ms
+        except Exception:
+            pass
+        return None
 
     def _get_session_stats(self, conn) -> dict:
         """Read V$MYSTAT + V$STATNAME for current session I/O stats."""
