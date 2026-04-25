@@ -102,7 +102,7 @@ export default function AuthPage() {
 
         {/* Architecture diagram */}
         <Container header={<Header variant="h2">Architecture</Header>}>
-          <img src="/architecture.svg" alt="LastMile2Aurora Architecture" style={{ width: "100%", maxWidth: "900px", margin: "0 auto", display: "block" }} />
+          <img src="/architecture.svg" alt="LastMile2Aurora Architecture" style={{ width: "100%", display: "block" }} />
         </Container>
 
         {/* How it works — for customers */}
