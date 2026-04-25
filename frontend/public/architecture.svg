@@ -65,15 +65,10 @@
     <rect x="352" y="170" width="196" height="146" rx="10" fill="#0f1628" stroke="#2a3244"/>
     <rect x="352" y="170" width="196" height="4" rx="2" fill="url(#headerOracle)"/>
   </g>
-  <g transform="translate(378, 198)">
-    <ellipse cx="12" cy="5" rx="12" ry="4" fill="#fbbf24" opacity="0.92"/>
-    <rect x="0" y="5" width="24" height="22" fill="#fbbf24" opacity="0.92"/>
-    <ellipse cx="12" cy="27" rx="12" ry="4" fill="#d97706"/>
-  </g>
-  <text x="450" y="216" text-anchor="middle" font-size="18" font-weight="700" fill="#fbbf24">Oracle EE 19c</text>
-  <text x="450" y="238" text-anchor="middle" font-size="13" fill="#d6dde8">Source database</text>
-  <text x="450" y="260" text-anchor="middle" font-size="12" fill="#8b94a6" font-family="'JetBrains Mono', monospace">V$SQL · V$SESSTAT</text>
-  <text x="450" y="278" text-anchor="middle" font-size="12" fill="#8b94a6">elapsed_time · disk_reads</text>
+  <text x="450" y="206" text-anchor="middle" font-size="17" font-weight="700" fill="#fbbf24">Oracle EE 19c</text>
+  <text x="450" y="228" text-anchor="middle" font-size="12" fill="#d6dde8">Source database</text>
+  <text x="450" y="254" text-anchor="middle" font-size="12" fill="#8b94a6" font-family="'JetBrains Mono', monospace">V$SQL · V$SESSTAT</text>
+  <text x="450" y="274" text-anchor="middle" font-size="12" fill="#8b94a6">elapsed_time · disk_reads</text>
   <text x="450" y="298" text-anchor="middle" font-size="11" fill="#6a7285">Encrypted · KMS CMK</text>
 
   <!-- Aurora PG 16 -->
@@ -81,15 +76,10 @@
     <rect x="352" y="334" width="196" height="146" rx="10" fill="#0f1628" stroke="#2a3244"/>
     <rect x="352" y="334" width="196" height="4" rx="2" fill="url(#headerAurora)"/>
   </g>
-  <g transform="translate(378, 362)">
-    <ellipse cx="12" cy="5" rx="12" ry="4" fill="#60a5fa" opacity="0.92"/>
-    <rect x="0" y="5" width="24" height="22" fill="#60a5fa" opacity="0.92"/>
-    <ellipse cx="12" cy="27" rx="12" ry="4" fill="#2563eb"/>
-  </g>
-  <text x="450" y="380" text-anchor="middle" font-size="18" font-weight="700" fill="#60a5fa">Aurora PostgreSQL 16</text>
-  <text x="450" y="402" text-anchor="middle" font-size="13" fill="#d6dde8">Target database</text>
-  <text x="450" y="424" text-anchor="middle" font-size="12" fill="#8b94a6" font-family="'JetBrains Mono', monospace">pg_stat_statements</text>
-  <text x="450" y="442" text-anchor="middle" font-size="12" fill="#8b94a6">EXPLAIN ANALYZE · BUFFERS</text>
+  <text x="450" y="370" text-anchor="middle" font-size="17" font-weight="700" fill="#60a5fa">Aurora PostgreSQL 16</text>
+  <text x="450" y="392" text-anchor="middle" font-size="12" fill="#d6dde8">Target database</text>
+  <text x="450" y="418" text-anchor="middle" font-size="12" fill="#8b94a6" font-family="'JetBrains Mono', monospace">pg_stat_statements</text>
+  <text x="450" y="438" text-anchor="middle" font-size="11" fill="#8b94a6">EXPLAIN ANALYZE · BUFFERS</text>
   <text x="450" y="462" text-anchor="middle" font-size="11" fill="#6a7285">Encrypted · KMS CMK</text>
 
   <!-- ================= ENGINE (ECS Fargate) ================= -->
@@ -133,7 +123,7 @@
   </g>
   <g>
     <rect x="660" y="444" width="280" height="42" rx="7" fill="#0a0f1d" stroke="#1f2838"/>
-    <text x="800" y="470" text-anchor="middle" font-size="12" fill="#6a7285" letter-spacing="0.04em">Cognito Auth · CloudWatch Logs · WebSocket stream</text>
+    <text x="800" y="470" text-anchor="middle" font-size="10.5" fill="#6a7285" letter-spacing="0.03em">Cognito Auth · CloudWatch · WebSocket</text>
   </g>
 
   <!-- ================= UI COLUMN ================= -->
