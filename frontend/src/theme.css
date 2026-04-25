@@ -1,0 +1,230 @@
+/*
+ * Executive Console theme
+ * High-contrast light mode, hairline rules, muted accents, data-first.
+ */
+
+:root {
+  --lm-ink-900: #0b0f14;
+  --lm-ink-700: #242b36;
+  --lm-ink-500: #4a5463;
+  --lm-ink-400: #6b7686;
+  --lm-ink-300: #9aa4b2;
+  --lm-ink-200: #d2d7df;
+  --lm-ink-100: #e6e9ef;
+  --lm-ink-50: #f3f5f8;
+  --lm-canvas: #fafafa;
+  --lm-paper: #ffffff;
+
+  --lm-navy: #1f3a5f;
+  --lm-navy-tint: #eef2f8;
+  --lm-forest: #2f6b4f;
+  --lm-forest-tint: #eaf2ec;
+  --lm-clay: #9c3b2e;
+  --lm-clay-tint: #f5ebe8;
+  --lm-ochre: #a06a1a;
+  --lm-ochre-tint: #f5ede0;
+
+  --lm-border: var(--lm-ink-200);
+  --lm-rule: var(--lm-ink-100);
+
+  --lm-font-sans: "Amazon Ember", -apple-system, "Segoe UI", sans-serif;
+  --lm-font-mono: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+
+  --lm-radius-sm: 2px;
+  --lm-radius-md: 4px;
+
+  --lm-shadow-soft: 0 1px 2px rgba(11, 15, 20, 0.04);
+}
+
+/* Page canvas */
+body {
+  background: var(--lm-canvas);
+  color: var(--lm-ink-900);
+}
+
+/* Stat strip — replaces gradient dark hero */
+.lm-stat-strip {
+  background: var(--lm-paper);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius-md);
+  padding: 20px 28px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  box-shadow: var(--lm-shadow-soft);
+}
+
+.lm-stat-strip > .lm-stat {
+  padding: 8px 20px;
+  border-left: 1px solid var(--lm-rule);
+}
+
+.lm-stat-strip > .lm-stat:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+
+.lm-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lm-ink-400);
+  margin-bottom: 6px;
+}
+
+.lm-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--lm-ink-900);
+  line-height: 1.1;
+}
+
+.lm-stat-value--muted { color: var(--lm-ink-500); }
+.lm-stat-value--navy { color: var(--lm-navy); }
+.lm-stat-value--forest { color: var(--lm-forest); }
+.lm-stat-value--clay { color: var(--lm-clay); }
+.lm-stat-value--ochre { color: var(--lm-ochre); }
+
+/* Status dot — minimal status indicator */
+.lm-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.lm-dot--live { background: var(--lm-navy); animation: lm-pulse 1.6s ease-in-out infinite; }
+.lm-dot--ok { background: var(--lm-forest); }
+.lm-dot--warn { background: var(--lm-ochre); }
+.lm-dot--err { background: var(--lm-clay); }
+
+@keyframes lm-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Code blocks — paper background, syntax-aware coloring */
+.lm-code {
+  font-family: var(--lm-font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 16px 18px;
+  border-radius: var(--lm-radius-md);
+  border: 1px solid var(--lm-border);
+}
+.lm-code--original {
+  background: var(--lm-paper);
+  color: var(--lm-ink-700);
+  border-left: 3px solid var(--lm-ink-300);
+}
+.lm-code--rewritten {
+  background: var(--lm-paper);
+  color: var(--lm-ink-700);
+  border-left: 3px solid var(--lm-forest);
+}
+
+.lm-code-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lm-ink-500);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Batch fix rows */
+.lm-fix-row {
+  border: 1px solid var(--lm-border);
+  border-left: 3px solid var(--lm-ink-300);
+  border-radius: var(--lm-radius-md);
+  padding: 14px 18px;
+  background: var(--lm-paper);
+}
+.lm-fix-row--ok { border-left-color: var(--lm-forest); }
+.lm-fix-row--err { border-left-color: var(--lm-clay); }
+
+.lm-fix-title {
+  font-weight: 600;
+  color: var(--lm-ink-900);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.lm-fix-title--err { color: var(--lm-clay); }
+
+/* Verdict badge — replaces emoji-laden badges */
+.lm-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--lm-radius-sm);
+  border: 1px solid transparent;
+}
+.lm-verdict--improved { background: var(--lm-forest-tint); color: var(--lm-forest); border-color: var(--lm-forest); }
+.lm-verdict--worse { background: var(--lm-clay-tint); color: var(--lm-clay); border-color: var(--lm-clay); }
+.lm-verdict--neutral { background: var(--lm-ink-50); color: var(--lm-ink-500); border-color: var(--lm-ink-200); }
+.lm-verdict--invalid { background: var(--lm-ochre-tint); color: var(--lm-ochre); border-color: var(--lm-ochre); }
+
+/* Delta numbers in tables */
+.lm-delta {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.lm-delta--up { color: var(--lm-clay); font-weight: 600; }
+.lm-delta--down { color: var(--lm-forest); }
+.lm-delta--flat { color: var(--lm-ink-500); }
+
+/* Section separator for report detail */
+.lm-section-note {
+  font-size: 13px;
+  color: var(--lm-ink-500);
+  line-height: 1.6;
+}
+
+/* Workload size option label — removes the colored circle emoji */
+.lm-workload-label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.lm-workload-tier {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--lm-radius-sm);
+  border: 1px solid var(--lm-border);
+  color: var(--lm-ink-500);
+}
+.lm-workload-tier--s { border-color: var(--lm-forest); color: var(--lm-forest); }
+.lm-workload-tier--m { border-color: var(--lm-ochre); color: var(--lm-ochre); }
+.lm-workload-tier--l { border-color: var(--lm-clay); color: var(--lm-clay); }
+
+/* Mode picker tiles — reduce playful emoji-heavy cards */
+.lm-mode-tile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--lm-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lm-navy-tint);
+  color: var(--lm-navy);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}

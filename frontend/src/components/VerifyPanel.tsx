@@ -5,7 +5,6 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Box from "@cloudscape-design/components/box";
 import Alert from "@cloudscape-design/components/alert";
 import Button from "@cloudscape-design/components/button";
-import Badge from "@cloudscape-design/components/badge";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 export interface VerifyResult {
@@ -25,16 +24,19 @@ export function VerifyPanel({ verifyResult, deciding, onDecide }: { verifyResult
     return <Alert type="error">{verifyResult.error}</Alert>;
   }
   const { before, after, delta_pct = 0, verdict, status } = verifyResult;
-  const verdictColor =
-    verdict === "improved" ? "green" : verdict === "worse" ? "red" : verdict === "invalid" ? "grey" : "blue";
+  const verdictClass =
+    verdict === "improved" ? "lm-verdict lm-verdict--improved" :
+    verdict === "worse" ? "lm-verdict lm-verdict--worse" :
+    verdict === "invalid" ? "lm-verdict lm-verdict--invalid" :
+    "lm-verdict lm-verdict--neutral";
   const verdictLabel =
-    verdict === "improved" ? `✓ Improved (${delta_pct.toFixed(0)}%)` :
-    verdict === "worse" ? `✗ Worse (${delta_pct > 0 ? "+" : ""}${delta_pct.toFixed(0)}%)` :
-    verdict === "invalid" ? "⚠ Invalid — row counts differ or execution failed" :
-    `~ Neutral (${delta_pct > 0 ? "+" : ""}${delta_pct.toFixed(1)}%)`;
+    verdict === "improved" ? `Improved · ${delta_pct.toFixed(0)}%` :
+    verdict === "worse" ? `Worse · ${delta_pct > 0 ? "+" : ""}${delta_pct.toFixed(0)}%` :
+    verdict === "invalid" ? "Invalid · row counts differ or execution failed" :
+    `Neutral · ${delta_pct > 0 ? "+" : ""}${delta_pct.toFixed(1)}%`;
   const decided = status === "accepted" || status === "rejected";
   return (
-    <Container header={<Header variant="h3" actions={<Badge color={verdictColor as any}>{verdictLabel}</Badge>}>Verification — ran both against Aurora PG</Header>}>
+    <Container header={<Header variant="h3" actions={<span className={verdictClass}>{verdictLabel}</span>}>Verification — ran both against Aurora PG</Header>}>
       <SpaceBetween size="m">
         <ColumnLayout columns={4} variant="text-grid">
           <div>

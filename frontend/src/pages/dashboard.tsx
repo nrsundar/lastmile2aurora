@@ -208,8 +208,8 @@ export default function DashboardPage() {
     return (
       <ContentLayout header={<Header variant="h1" description="Choose how you want to run the migration watchdog.">LastMile2Aurora — Dashboard</Header>}>
         <Tiles onChange={({ detail }) => setMode(detail.value)} value={mode ?? ""} columns={2} items={[
-          { value: "demo", label: "Demo Mode", description: "Use preconfigured Oracle EE 19c and Aurora PG 16 with tagged demo queries. Great for demos and workshops.", image: <Box textAlign="center" fontSize="display-l">🎯</Box> },
-          { value: "custom", label: "Connect Your Databases", description: "Enter your own Oracle source and Aurora PostgreSQL target connection strings. Use your real application workload with tagged queries.", image: <Box textAlign="center" fontSize="display-l">🔌</Box> },
+          { value: "demo", label: "Demo Mode", description: "Use preconfigured Oracle EE 19c and Aurora PG 16 with tagged demo queries. Great for demos and workshops.", image: <div className="lm-mode-tile-icon">DM</div> },
+          { value: "custom", label: "Connect Your Databases", description: "Enter your own Oracle source and Aurora PostgreSQL target connection strings. Use your real application workload with tagged queries.", image: <div className="lm-mode-tile-icon">DB</div> },
         ]} />
       </ContentLayout>
     );
@@ -275,9 +275,9 @@ export default function DashboardPage() {
             <SpaceBetween size="l">
               <FormField label="Workload Size">
                 <RadioGroup value={workloadSize} onChange={({ detail }) => setWorkloadSize(detail.value)} items={[
-                  { value: "small", label: "🟢 Small — 16 queries, single pass (~30 sec)", description: "Quick demo" },
-                  { value: "medium", label: "🟡 Medium — 16 queries × 3 rounds (~2 min)", description: "Workshop / POC" },
-                  { value: "large", label: "🔴 Large — 16 queries × 10 rounds (~5 min)", description: "Production simulation" },
+                  { value: "small", label: "Small — 16 queries, single pass (~30 sec)", description: "Quick demo" },
+                  { value: "medium", label: "Medium — 16 queries × 3 rounds (~2 min)", description: "Workshop / POC" },
+                  { value: "large", label: "Large — 16 queries × 10 rounds (~5 min)", description: "Production simulation" },
                 ]} />
               </FormField>
               <Button variant="primary" onClick={runDemo} iconName="caret-right-filled">
@@ -287,47 +287,44 @@ export default function DashboardPage() {
           </Container>
         )}
 
-        {/* Live progress visualization */}
+        {/* Live progress — Executive Console stat strip */}
         {(simulating || results.length > 0) && (
-          <div style={{ background: simulating ? "linear-gradient(135deg, #0f172a, #1e293b)" : results.every(r => r.passed) ? "linear-gradient(135deg, #052e16, #166534)" : "linear-gradient(135deg, #1e293b, #334155)", borderRadius: "12px", padding: "24px", color: "white" }}>
-            <SpaceBetween size="m">
-              <ColumnLayout columns={5}>
-                <Box textAlign="center">
-                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Status</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", marginTop: "4px" }}>
-                    {simulating ? <span style={{ color: "#38bdf8" }}>⚡ Running</span> : <span style={{ color: "#4ade80" }}>✓ Complete</span>}
-                  </div>
-                </Box>
-                <Box textAlign="center">
-                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Elapsed</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "white", marginTop: "4px" }}>{formatTime(elapsed)}</div>
-                </Box>
-                <Box textAlign="center">
-                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Passed</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#4ade80", marginTop: "4px" }}>{passed.length}</div>
-                </Box>
-                <Box textAlign="center">
-                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Regressions</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: regressions.length > 0 ? "#f87171" : "#4ade80", marginTop: "4px" }}>{regressions.length}</div>
-                </Box>
-                <Box textAlign="center">
-                  <div style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px" }}>Mismatches</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: failed.length > 0 ? "#fbbf24" : "#4ade80", marginTop: "4px" }}>{failed.length}</div>
-                </Box>
-              </ColumnLayout>
+          <SpaceBetween size="m">
+            <div className="lm-stat-strip">
+              <div className="lm-stat">
+                <div className="lm-stat-label">Status</div>
+                <div className="lm-stat-value">
+                  <span className={`lm-dot lm-dot--${simulating ? "live" : regressions.length > 0 ? "err" : failed.length > 0 ? "warn" : "ok"}`} />
+                  {simulating ? "Running" : "Complete"}
+                </div>
+              </div>
+              <div className="lm-stat">
+                <div className="lm-stat-label">Elapsed</div>
+                <div className="lm-stat-value">{formatTime(elapsed)}</div>
+              </div>
+              <div className="lm-stat">
+                <div className="lm-stat-label">Passed</div>
+                <div className={`lm-stat-value ${passed.length > 0 ? "lm-stat-value--forest" : "lm-stat-value--muted"}`}>{passed.length}</div>
+              </div>
+              <div className="lm-stat">
+                <div className="lm-stat-label">Regressions</div>
+                <div className={`lm-stat-value ${regressions.length > 0 ? "lm-stat-value--clay" : "lm-stat-value--muted"}`}>{regressions.length}</div>
+              </div>
+              <div className="lm-stat">
+                <div className="lm-stat-label">Mismatches</div>
+                <div className={`lm-stat-value ${failed.length > 0 ? "lm-stat-value--ochre" : "lm-stat-value--muted"}`}>{failed.length}</div>
+              </div>
+            </div>
 
-              {simulating && (
-                <SpaceBetween size="xs">
-                  <ProgressBar
-                    value={progress}
-                    label={`Processing: ${currentQuery}`}
-                    description={`${results.length} of ${demoQueries.length * (workloadSize === "small" ? 1 : workloadSize === "medium" ? 3 : 10)} queries completed`}
-                    variant="standalone"
-                  />
-                </SpaceBetween>
-              )}
-            </SpaceBetween>
-          </div>
+            {simulating && (
+              <ProgressBar
+                value={progress}
+                label={`Processing: ${currentQuery}`}
+                description={`${results.length} of ${demoQueries.length * (workloadSize === "small" ? 1 : workloadSize === "medium" ? 3 : 10)} queries completed`}
+                variant="standalone"
+              />
+            )}
+          </SpaceBetween>
         )}
 
         {/* Results table — shows live as queries complete */}
@@ -354,7 +351,8 @@ export default function DashboardPage() {
               { id: "delta", header: "Delta", cell: (r) => {
                 if (!r.oracle_ms || !r.pg_ms) return "—";
                 const d = ((r.pg_ms - r.oracle_ms) / r.oracle_ms * 100);
-                return <span style={{ color: d > 20 ? "#d32f2f" : d < -10 ? "#2e7d32" : "#666", fontWeight: Math.abs(d) > 20 ? "bold" : "normal" }}>{d > 0 ? "+" : ""}{d.toFixed(0)}%</span>;
+                const cls = d > 20 ? "lm-delta lm-delta--up" : d < -10 ? "lm-delta lm-delta--down" : "lm-delta lm-delta--flat";
+                return <span className={cls}>{d > 0 ? "+" : ""}{d.toFixed(0)}%</span>;
               }},
               { id: "ora_io", header: "Oracle Blocks", cell: (r) => {
                 const s = r.oracle_stats;
@@ -376,7 +374,7 @@ export default function DashboardPage() {
                   <Button variant="inline-link" loading={fixingQuery === r.query_hash} onClick={() => handleAIFix(r)} iconName="gen-ai">
                     AI Fix
                   </Button>
-                ) : <span style={{ color: "#4ade80" }}>—</span>
+                ) : <span style={{ color: "var(--lm-ink-300)" }}>—</span>
               },
             ]}
             items={results}
@@ -385,7 +383,7 @@ export default function DashboardPage() {
 
         {/* AI Fix Progress */}
         {fixProgress && (
-          <div style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", borderRadius: "12px", padding: "20px 32px", color: "white" }}>
+          <div style={{ background: "var(--lm-paper)", border: "1px solid var(--lm-border)", borderLeft: "3px solid var(--lm-navy)", borderRadius: "var(--lm-radius-md)", padding: "14px 20px" }}>
             <SpaceBetween size="xs" direction="horizontal" alignItems="center">
               <StatusIndicator type="in-progress">{fixProgress}</StatusIndicator>
               {fixingAll && <Box color="text-body-secondary">Amazon Bedrock (Claude) is analyzing execution plans and rewriting queries...</Box>}
@@ -410,18 +408,14 @@ export default function DashboardPage() {
             ) : (
               <SpaceBetween size="l">
                 <ColumnLayout columns={2}>
-                  <SpaceBetween size="xs">
-                    <Box variant="h4">Original SQL</Box>
-                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#1e293b", color: "#f87171", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
-                      {fixResult.original}
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween size="xs">
-                    <Box variant="h4">Rewritten SQL (AI Fix)</Box>
-                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#0f2e1a", color: "#4ade80", padding: "16px", borderRadius: "8px", lineHeight: "1.6" }}>
-                      {fixResult.rewritten}
-                    </div>
-                  </SpaceBetween>
+                  <div>
+                    <div className="lm-code-label">Original SQL</div>
+                    <div className="lm-code lm-code--original">{fixResult.original}</div>
+                  </div>
+                  <div>
+                    <div className="lm-code-label"><span className="lm-dot lm-dot--ok" />Rewritten SQL — AI Fix</div>
+                    <div className="lm-code lm-code--rewritten">{fixResult.rewritten}</div>
+                  </div>
                 </ColumnLayout>
                 <Container header={<Header variant="h3">Rationale</Header>}>
                   <Box>{fixResult.rationale}</Box>
@@ -441,22 +435,22 @@ export default function DashboardPage() {
           <Container header={<Header variant="h2" counter={`(${allFixes.length})`}>Batch AI Fix Results</Header>}>
             <SpaceBetween size="l">
               {allFixes.map((fix, i) => (
-                <div key={i} style={{ background: fix.error ? "#1e293b" : "#0f2e1a", borderRadius: "8px", padding: "16px", borderLeft: fix.error ? "4px solid #f87171" : "4px solid #4ade80" }}>
+                <div key={i} className={`lm-fix-row ${fix.error ? "lm-fix-row--err" : "lm-fix-row--ok"}`}>
                   <SpaceBetween size="s">
-                    <Box variant="h4" color={fix.error ? "text-status-error" : "text-status-success"}>
-                      {fix.error ? "❌" : "✅"} {fix.queryName}
-                    </Box>
+                    <div className={`lm-fix-title ${fix.error ? "lm-fix-title--err" : ""}`}>
+                      {fix.queryName}
+                    </div>
                     {fix.error ? (
                       <Box color="text-status-error">{fix.error}</Box>
                     ) : (
                       <ColumnLayout columns={2}>
                         <div>
-                          <Box variant="awsui-key-label">Original</Box>
-                          <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#f87171", marginTop: "4px" }}>{fix.original?.slice(0, 120)}...</div>
+                          <div className="lm-code-label">Original</div>
+                          <div style={{ fontFamily: "var(--lm-font-mono)", fontSize: "12px", color: "var(--lm-ink-700)", lineHeight: 1.5 }}>{fix.original?.slice(0, 120)}...</div>
                         </div>
                         <div>
-                          <Box variant="awsui-key-label">AI Rewrite</Box>
-                          <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#4ade80", marginTop: "4px" }}>{fix.rewritten?.slice(0, 120)}...</div>
+                          <div className="lm-code-label"><span className="lm-dot lm-dot--ok" />AI Rewrite</div>
+                          <div style={{ fontFamily: "var(--lm-font-mono)", fontSize: "12px", color: "var(--lm-ink-700)", lineHeight: 1.5 }}>{fix.rewritten?.slice(0, 120)}...</div>
                         </div>
                       </ColumnLayout>
                     )}
