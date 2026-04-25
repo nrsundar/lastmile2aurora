@@ -11,6 +11,7 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Select from "@cloudscape-design/components/select";
 import Button from "@cloudscape-design/components/button";
 import Alert from "@cloudscape-design/components/alert";
+import { VerifyPanel } from "../components/VerifyPanel";
 import { api } from "../lib/api";
 
 export default function ReportPage() {
@@ -22,6 +23,9 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [fixingQuery, setFixingQuery] = useState<string | null>(null);
   const [fixResult, setFixResult] = useState<any>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<any>(null);
+  const [deciding, setDeciding] = useState(false);
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("lm_run_ids") || "[]") as string[];
@@ -44,13 +48,44 @@ export default function ReportPage() {
     const sql = q.translated_sql || q.original_sql || "";
     setFixingQuery(q.query_hash);
     setFixResult(null);
+    setVerifyResult(null);
     try {
       const resp = await api.remediate(sql);
-      setFixResult({ ...resp, queryName: q.original_sql?.slice(0, 40) });
+      setFixResult({ ...resp, queryName: q.original_sql?.slice(0, 40), query_hash: q.query_hash });
     } catch (e: any) {
       setFixResult({ error: e.message || "Failed to get AI fix" });
     }
     setFixingQuery(null);
+  };
+
+  const handleVerify = async () => {
+    if (!fixResult?.original || !fixResult?.rewritten || !fixResult?.query_hash) return;
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const resp = await api.verifyFix({
+        query_hash: fixResult.query_hash,
+        original_sql: fixResult.original,
+        rewritten_sql: fixResult.rewritten,
+        run_id: selectedRunId || undefined,
+      });
+      setVerifyResult(resp);
+    } catch (e: any) {
+      setVerifyResult({ error: e.message || "Verification failed" });
+    }
+    setVerifying(false);
+  };
+
+  const handleDecide = async (action: "accept" | "reject") => {
+    if (!verifyResult?.verification_id) return;
+    setDeciding(true);
+    try {
+      const resp = await api.verifyFixVerdict(verifyResult.verification_id, action);
+      setVerifyResult({ ...verifyResult, status: resp.status });
+    } catch (e: any) {
+      setVerifyResult({ ...verifyResult, decideError: e.message || "Failed to update status" });
+    }
+    setDeciding(false);
   };
 
   const handleFixAll = async () => {
@@ -115,7 +150,16 @@ export default function ReportPage() {
 
         {/* AI Fix Result */}
         {fixResult && !fixResult.batch && (
-          <Container header={<Header variant="h2" actions={<Button onClick={() => setFixResult(null)} iconName="close">Dismiss</Button>}>AI-Powered Query Fix</Header>}>
+          <Container header={<Header variant="h2" actions={
+            <SpaceBetween direction="horizontal" size="xs">
+              {!fixResult.error && fixResult.query_hash && (
+                <Button iconName="status-positive" variant="primary" loading={verifying} onClick={handleVerify}>
+                  Apply &amp; Verify
+                </Button>
+              )}
+              <Button onClick={() => { setFixResult(null); setVerifyResult(null); }} iconName="close">Dismiss</Button>
+            </SpaceBetween>
+          }>AI-Powered Query Fix</Header>}>
             {fixResult.error ? (
               <Alert type="error">{fixResult.error}</Alert>
             ) : (
@@ -131,6 +175,7 @@ export default function ReportPage() {
                   </div>
                 </ColumnLayout>
                 {fixResult.rationale && <Box><b>Rationale:</b> {fixResult.rationale}</Box>}
+                {verifyResult && <VerifyPanel verifyResult={verifyResult} deciding={deciding} onDecide={handleDecide} />}
               </SpaceBetween>
             )}
           </Container>

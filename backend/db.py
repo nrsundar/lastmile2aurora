@@ -123,6 +123,32 @@ def init_schema():
                     run_id VARCHAR(100) DEFAULT '',
                     user_sub VARCHAR(100) DEFAULT ''
                 );
+
+                CREATE TABLE IF NOT EXISTS lm_fix_verifications (
+                    id SERIAL PRIMARY KEY,
+                    query_id INT REFERENCES lm_monitored_queries(id),
+                    remediation_id INT REFERENCES lm_remediations(id),
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    original_sql TEXT NOT NULL,
+                    rewritten_sql TEXT NOT NULL,
+                    before_ms FLOAT,
+                    after_ms FLOAT,
+                    delta_ms FLOAT,
+                    delta_pct FLOAT,
+                    before_rows INT,
+                    after_rows INT,
+                    before_blks_read INT,
+                    after_blks_read INT,
+                    before_blks_hit INT,
+                    after_blks_hit INT,
+                    verdict VARCHAR(20) NOT NULL,
+                    status VARCHAR(20) DEFAULT 'pending',
+                    decided_at TIMESTAMPTZ,
+                    decided_by VARCHAR(100),
+                    error TEXT,
+                    run_id VARCHAR(100) DEFAULT '',
+                    user_sub VARCHAR(100) DEFAULT ''
+                );
             """)
         conn.commit()
 

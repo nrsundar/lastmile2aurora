@@ -15,6 +15,7 @@ import FormField from "@cloudscape-design/components/form-field";
 import Input from "@cloudscape-design/components/input";
 import RadioGroup from "@cloudscape-design/components/radio-group";
 import ProgressBar from "@cloudscape-design/components/progress-bar";
+import { VerifyPanel } from "../components/VerifyPanel";
 import { api } from "../lib/api";
 
 import demoQueries from "../../mock-workload-queries.json";
@@ -58,6 +59,9 @@ export default function DashboardPage() {
   const [fixingAll, setFixingAll] = useState(false);
   const [fixProgress, setFixProgress] = useState("");
   const [allFixes, setAllFixes] = useState<any[]>([]);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<any>(null);
+  const [deciding, setDeciding] = useState(false);
 
   // Cleanup timer
   useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
@@ -135,15 +139,46 @@ export default function DashboardPage() {
     const sql = r.pg_sql || r.oracle_sql || "";
     setFixingQuery(r.query_hash);
     setFixResult(null);
+    setVerifyResult(null);
     setFixProgress(`Analyzing execution plan for "${r.name}"...`);
     try {
       const resp = await api.remediate(sql);
-      setFixResult({ ...resp, queryName: r.name });
+      setFixResult({ ...resp, queryName: r.name, query_hash: r.query_hash });
     } catch (e: any) {
       setFixResult({ error: e.message || "Failed to get AI fix" });
     }
     setFixingQuery(null);
     setFixProgress("");
+  };
+
+  const handleVerify = async () => {
+    if (!fixResult?.original || !fixResult?.rewritten || !fixResult?.query_hash) return;
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const resp = await api.verifyFix({
+        query_hash: fixResult.query_hash,
+        original_sql: fixResult.original,
+        rewritten_sql: fixResult.rewritten,
+        run_id: currentRunId || undefined,
+      });
+      setVerifyResult(resp);
+    } catch (e: any) {
+      setVerifyResult({ error: e.message || "Verification failed" });
+    }
+    setVerifying(false);
+  };
+
+  const handleDecide = async (action: "accept" | "reject") => {
+    if (!verifyResult?.verification_id) return;
+    setDeciding(true);
+    try {
+      const resp = await api.verifyFixVerdict(verifyResult.verification_id, action);
+      setVerifyResult({ ...verifyResult, status: resp.status });
+    } catch (e: any) {
+      setVerifyResult({ ...verifyResult, decideError: e.message || "Failed to update status" });
+    }
+    setDeciding(false);
   };
 
   const handleFixAll = async () => {
@@ -360,7 +395,16 @@ export default function DashboardPage() {
 
         {/* AI Fix Result Panel — single query */}
         {fixResult && (
-          <Container header={<Header variant="h2" actions={<Button onClick={() => setFixResult(null)} iconName="close">Dismiss</Button>}>AI-Powered Query Fix</Header>}>
+          <Container header={<Header variant="h2" actions={
+            <SpaceBetween direction="horizontal" size="xs">
+              {!fixResult.error && fixResult.query_hash && (
+                <Button iconName="status-positive" variant="primary" loading={verifying} onClick={handleVerify}>
+                  Apply &amp; Verify
+                </Button>
+              )}
+              <Button onClick={() => { setFixResult(null); setVerifyResult(null); }} iconName="close">Dismiss</Button>
+            </SpaceBetween>
+          }>AI-Powered Query Fix</Header>}>
             {fixResult.error ? (
               <Alert type="error">{fixResult.error}</Alert>
             ) : (
@@ -387,6 +431,7 @@ export default function DashboardPage() {
                     <ul>{fixResult.changes.map((c: string, i: number) => <li key={i}>{c}</li>)}</ul>
                   </Container>
                 )}
+                {verifyResult && <VerifyPanel verifyResult={verifyResult} deciding={deciding} onDecide={handleDecide} />}
               </SpaceBetween>
             )}
           </Container>

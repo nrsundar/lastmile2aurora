@@ -193,6 +193,172 @@ async def api_remediate(req: RemediateRequest, user: dict = Depends(get_current_
 
 
 # ═══════════════════════════════════════════════════════════════════
+# Apply & Verify — run original vs rewritten against Aurora PG, compare
+# ═══════════════════════════════════════════════════════════════════
+class VerifyFixRequest(BaseModel):
+    query_hash: str
+    original_sql: str
+    rewritten_sql: str
+    remediation_id: Optional[int] = None
+    run_id: Optional[str] = None
+
+
+def _run_on_pg(sql: str) -> dict:
+    """Execute one SQL on Aurora PG and return measurement fields, tolerating errors."""
+    try:
+        res = execute_query(sql)
+        stats = res.get("stats", {}) or {}
+        explain_ms = stats.get("explain_exec_ms", 0) or 0
+        return {
+            "ms": explain_ms,
+            "rows": res.get("row_count", 0),
+            "blks_read": stats.get("shared_blks_read", 0) or 0,
+            "blks_hit": stats.get("shared_blks_hit", 0) or 0,
+            "error": None,
+        }
+    except Exception as e:
+        return {"ms": 0, "rows": 0, "blks_read": 0, "blks_hit": 0, "error": str(e)}
+
+
+def _verdict(before: dict, after: dict) -> str:
+    """Classify the verification outcome.
+
+    invalid: either query errored, or row counts differ (semantics changed).
+    improved/worse: >=20% AND >=2ms delta (mirrors regression threshold in validator.py).
+    neutral: within noise.
+    """
+    if before["error"] or after["error"]:
+        return "invalid"
+    if before["rows"] != after["rows"]:
+        return "invalid"
+    b, a = before["ms"], after["ms"]
+    if b <= 0:
+        return "neutral"
+    delta_ms = a - b
+    delta_pct = (delta_ms / b) * 100
+    if delta_ms <= -2 and delta_pct <= -20:
+        return "improved"
+    if delta_ms >= 2 and delta_pct >= 20:
+        return "worse"
+    return "neutral"
+
+
+@app.post("/api/verify-fix")
+async def api_verify_fix(req: VerifyFixRequest, user: dict = Depends(get_current_user)):
+    before = _run_on_pg(req.original_sql)
+    after = _run_on_pg(req.rewritten_sql)
+
+    b_ms, a_ms = before["ms"], after["ms"]
+    delta_ms = a_ms - b_ms
+    delta_pct = ((delta_ms / b_ms) * 100) if b_ms > 0 else 0
+    verdict = _verdict(before, after)
+
+    verification_id = None
+    try:
+        conn = get_pool().getconn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM lm_monitored_queries WHERE query_hash = %s", (req.query_hash,))
+                row = cur.fetchone()
+                query_id = row[0] if row else None
+                cur.execute("""
+                    INSERT INTO lm_fix_verifications
+                    (query_id, remediation_id, original_sql, rewritten_sql,
+                     before_ms, after_ms, delta_ms, delta_pct,
+                     before_rows, after_rows,
+                     before_blks_read, after_blks_read, before_blks_hit, after_blks_hit,
+                     verdict, error, run_id, user_sub)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                """, (
+                    query_id, req.remediation_id, req.original_sql, req.rewritten_sql,
+                    b_ms, a_ms, delta_ms, delta_pct,
+                    before["rows"], after["rows"],
+                    before["blks_read"], after["blks_read"], before["blks_hit"], after["blks_hit"],
+                    verdict, before["error"] or after["error"],
+                    req.run_id or "", user.get("sub", ""),
+                ))
+                verification_id = cur.fetchone()[0]
+            conn.commit()
+        finally:
+            get_pool().putconn(conn)
+    except Exception as e:
+        print(f"Verification storage failed: {e}")
+
+    await _broadcast({
+        "type": "fix_verified",
+        "query_hash": req.query_hash,
+        "verification_id": verification_id,
+        "verdict": verdict,
+        "delta_pct": delta_pct,
+    })
+
+    return {
+        "verification_id": verification_id,
+        "query_hash": req.query_hash,
+        "verdict": verdict,
+        "status": "pending",
+        "before": before,
+        "after": after,
+        "delta_ms": delta_ms,
+        "delta_pct": delta_pct,
+    }
+
+
+class VerifyVerdictRequest(BaseModel):
+    action: str  # "accept" | "reject"
+
+
+@app.post("/api/verify-fix/{verification_id}/verdict")
+async def api_verify_fix_verdict(verification_id: int, req: VerifyVerdictRequest, user: dict = Depends(get_current_user)):
+    if req.action not in ("accept", "reject"):
+        raise HTTPException(status_code=400, detail="action must be 'accept' or 'reject'")
+    new_status = "accepted" if req.action == "accept" else "rejected"
+    conn = get_pool().getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE lm_fix_verifications
+                SET status = %s, decided_at = NOW(), decided_by = %s
+                WHERE id = %s
+                RETURNING id, status
+            """, (new_status, user.get("sub", ""), verification_id))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="verification not found")
+        conn.commit()
+    finally:
+        get_pool().putconn(conn)
+    return {"verification_id": row[0], "status": row[1]}
+
+
+@app.get("/api/verifications")
+async def api_list_verifications(run_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    conn = get_pool().getconn()
+    try:
+        with conn.cursor() as cur:
+            if run_id:
+                cur.execute("""
+                    SELECT v.*, q.query_hash
+                    FROM lm_fix_verifications v
+                    LEFT JOIN lm_monitored_queries q ON q.id = v.query_id
+                    WHERE v.run_id = %s
+                    ORDER BY v.created_at DESC LIMIT 100
+                """, (run_id,))
+            else:
+                cur.execute("""
+                    SELECT v.*, q.query_hash
+                    FROM lm_fix_verifications v
+                    LEFT JOIN lm_monitored_queries q ON q.id = v.query_id
+                    ORDER BY v.created_at DESC LIMIT 100
+                """)
+            cols = [d[0] for d in cur.description]
+            return [dict(zip(cols, r)) for r in cur.fetchall()]
+    finally:
+        get_pool().putconn(conn)
+
+
+# ═══════════════════════════════════════════════════════════════════
 # Dashboard data — monitored queries, snapshots, alerts
 # ═══════════════════════════════════════════════════════════════════
 @app.get("/api/queries")

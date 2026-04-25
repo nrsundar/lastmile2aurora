@@ -314,7 +314,7 @@ aws cloudfront delete-distribution --id EN5DGHAHCX85H --if-match <etag>
 
 | # | Feature | Description | Impact |
 |---|---------|-------------|--------|
-| 1 | **Apply & Verify AI Fix** | After AI generates a rewritten SQL, user clicks "Apply & Verify". Backend runs both original and rewritten SQL against Aurora PG, compares execution time, blocks read, and row count. Shows before/after diff. If better → "Applied ✅". If worse → "Rejected ❌". Closes the loop from detection to verified fix. | Proves the AI fix actually works — not just suggested |
+| 1 | **Apply & Verify AI Fix** ✅ *Shipped* | After AI generates a rewritten SQL, user clicks "Apply & Verify". Backend runs both original and rewritten SQL against Aurora PG, compares execution time, blocks read, and row count. Shows before/after diff with verdict (improved / neutral / worse / invalid) and Accept/Reject. Closes the loop from detection to verified fix. | Proves the AI fix actually works — not just suggested |
 | 2 | **Tag Auto-Injector** | CLI that scans source files (Python, Java, Go), finds SQL literals, and auto-injects stable tags derived from query shape hash. `lastmile2aurora tag ./src/` — 60-second command. Removes the manual tagging burden. | Turns a manual ritual into automation |
 | 3 | **Regression Root-Cause Narrative** | When regression detected, LLM fetches both execution plans, compares them, returns: plain-English diagnosis, suspected root cause (missing index, stale stats, plan quirk), specific remediation (`CREATE INDEX ...`), and expected impact estimate. | Turns detector into consultant |
 | 4 | **Pre-Cutover Readiness Scorecard** | Holistic confidence score (0-100): % queries passing, un-remediated regressions, data volume parity, coverage %, critical-path query status. "Ready to Cut Over" traffic-light badge. Expose as API for CI/CD gating. | Single number for leadership approval |
@@ -323,59 +323,59 @@ aws cloudfront delete-distribution --id EN5DGHAHCX85H --if-match <etag>
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 4 | **SQL Server Source** | Extend to T-SQL: `GETDATE`, `TOP`, `CROSS APPLY`, `TRY/CATCH`, `MERGE`, CTE syntax. Doubles TAM — "commercial DB → Aurora PG" pitch. |
-| 5 | **Aurora MySQL Target** | Support MySQL 8 as target dialect. Many SCT migrations go Oracle/MSSQL → Aurora MySQL. |
-| 6 | **Babelfish Mode** | Validate T-SQL passthrough via Aurora PG + Babelfish. Premium AWS talking point for SQL Server cohort. |
+| 5 | **SQL Server Source** | Extend to T-SQL: `GETDATE`, `TOP`, `CROSS APPLY`, `TRY/CATCH`, `MERGE`, CTE syntax. Doubles TAM — "commercial DB → Aurora PG" pitch. |
+| 6 | **Aurora MySQL Target** | Support MySQL 8 as target dialect. Many SCT migrations go Oracle/MSSQL → Aurora MySQL. |
+| 7 | **Babelfish Mode** | Validate T-SQL passthrough via Aurora PG + Babelfish. Premium AWS talking point for SQL Server cohort. |
 
 ### 📊 Data & Observability
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 7 | **Production Workload Replay** | Capture mode: read Oracle `V$SQL_HISTORY` or AWR dumps. Replay mode: rerun exact queries against Aurora PG. Compare production distribution, not synthetic. |
-| 8 | **Continuous Watchdog Mode** | Runs every N minutes during/after cutover. Samples tagged queries from `pg_stat_statements` / `V$SQL`. Detects drift at week 2 due to data growth. Alerts via SNS/Slack. Extends from "pre-cutover validator" to "post-cutover guardian." |
-| 9 | **Historical Trend View** | Query performance over time (line graph per tag). Regression rate trending down as fixes applied. Cutover-readiness score over time. |
+| 8 | **Production Workload Replay** | Capture mode: read Oracle `V$SQL_HISTORY` or AWR dumps. Replay mode: rerun exact queries against Aurora PG. Compare production distribution, not synthetic. |
+| 9 | **Continuous Watchdog Mode** | Runs every N minutes during/after cutover. Samples tagged queries from `pg_stat_statements` / `V$SQL`. Detects drift at week 2 due to data growth. Alerts via SNS/Slack. Extends from "pre-cutover validator" to "post-cutover guardian." |
+| 10 | **Historical Trend View** | Query performance over time (line graph per tag). Regression rate trending down as fixes applied. Cutover-readiness score over time. |
 
 ### 🤖 AI / LLM Enhancements
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 10 | **Self-Correcting Auto-Fix Loop** | LLM rewrites → auto-execute → rerun perf comparison → accept only if threshold met. Retry up to N iterations with prior failure as context. Query optimizer agent. |
-| 11 | **Index Recommendation Engine** | Analyze whether an index would help, propose `CREATE INDEX`. Use `hypopg` for hypothetical index validation before suggesting. |
-| 12 | **Statistics / Autovacuum Advisor** | Run `pg_stats` analysis, flag stale or misconfigured tables (`n_distinct`, `default_statistics_target`, autovacuum settings). Huge source of "mystery" regressions. |
-| 13 | **Session Variable / GUC Tuner** | Propose and test session-level GUC changes (`work_mem`, `enable_hashagg`). Some regressions go away with a single `SET`. |
+| 11 | **Self-Correcting Auto-Fix Loop** | LLM rewrites → auto-execute → rerun perf comparison → accept only if threshold met. Retry up to N iterations with prior failure as context. Query optimizer agent. |
+| 12 | **Index Recommendation Engine** | Analyze whether an index would help, propose `CREATE INDEX`. Use `hypopg` for hypothetical index validation before suggesting. |
+| 13 | **Statistics / Autovacuum Advisor** | Run `pg_stats` analysis, flag stale or misconfigured tables (`n_distinct`, `default_statistics_target`, autovacuum settings). Huge source of "mystery" regressions. |
+| 14 | **Session Variable / GUC Tuner** | Propose and test session-level GUC changes (`work_mem`, `enable_hashagg`). Some regressions go away with a single `SET`. |
 
 ### 🔌 Integrations
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 14 | **AWS DMS Integration** | Hook into DMS CDC stream: detect schema drift, row count divergence, replication lag. Full "DMS post-flight check." |
-| 15 | **SCT Assessment Import** | Import SCT assessment report → auto-prioritize queries by SCT complexity score. Closes the loop with SCT. |
-| 16 | **Q Developer / Kiro Plugin** | Inline translator while editing code. Highlight Oracle-isms with squiggly lines, one-click PG translation. |
-| 17 | **CI/CD Gate (GitHub Action / GitLab CI)** | Containerized CLI for pipelines: `lastmile2aurora-action@v1` with `min-score: 95`. Tool becomes part of deploy pipelines. |
+| 15 | **AWS DMS Integration** | Hook into DMS CDC stream: detect schema drift, row count divergence, replication lag. Full "DMS post-flight check." |
+| 16 | **SCT Assessment Import** | Import SCT assessment report → auto-prioritize queries by SCT complexity score. Closes the loop with SCT. |
+| 17 | **Q Developer / Kiro Plugin** | Inline translator while editing code. Highlight Oracle-isms with squiggly lines, one-click PG translation. |
+| 18 | **CI/CD Gate (GitHub Action / GitLab CI)** | Containerized CLI for pipelines: `lastmile2aurora-action@v1` with `min-score: 95`. Tool becomes part of deploy pipelines. |
 
 ### 🎨 UX / Polish
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 18 | **Side-by-Side Plan Diff View** | Oracle plan vs PG plan with color coding (green = same, red = different). |
-| 19 | **"Explain This Failure" Assistant** | Free-text chat with query context loaded. User asks "why is this slow?" → LLM responds with full context. |
-| 20 | **Export to PDF Report** | One-click executive summary: readiness score, regression count, remediation status, risk items. |
+| 19 | **Side-by-Side Plan Diff View** | Oracle plan vs PG plan with color coding (green = same, red = different). |
+| 20 | **"Explain This Failure" Assistant** | Free-text chat with query context loaded. User asks "why is this slow?" → LLM responds with full context. |
+| 21 | **Export to PDF Report** | One-click executive summary: readiness score, regression count, remediation status, risk items. |
 
 ### 🏢 Enterprise / Scale
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 21 | **Multi-Tenancy & RBAC** | Tenant/org model in Cognito, role-based views (DBA vs dev vs exec), SSO (SAML/OIDC), audit log. |
-| 22 | **Workload Profile Library** | Industry-standard workloads: TPC-H, TPC-DS, YCSB, sysbench. Pick closest to your workload. |
-| 23 | **Cost Projection Panel** | "If you cut over today, Aurora spend estimated at $X/mo." Uses performance data + Aurora pricing model. |
+| 22 | **Multi-Tenancy & RBAC** | Tenant/org model in Cognito, role-based views (DBA vs dev vs exec), SSO (SAML/OIDC), audit log. |
+| 23 | **Workload Profile Library** | Industry-standard workloads: TPC-H, TPC-DS, YCSB, sysbench. Pick closest to your workload. |
+| 24 | **Cost Projection Panel** | "If you cut over today, Aurora spend estimated at $X/mo." Uses performance data + Aurora pricing model. |
 
 ### 💡 Ambitious / Game-Changers
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 24 | **Shadow-Cutover Mode** | Dual-write proxy to both Oracle and Aurora PG for N days. Compare in real time. If parity holds, cutover is automatic. Holy grail of risk-free migration. |
-| 25 | **Auto-Generate Migration Playbook** | After validation run, generate markdown playbook: which queries need attention, which indexes to create, which stats to refresh, in what order. Hand-holdable to a junior engineer. |
-| 26 | **pg_tle / Custom Extension Parity Checker** | If Oracle uses custom PL/SQL packages, check whether PG extensions (`pg_tle`, `plv8`, `plrust`) cover the same functionality. Flag gaps SCT can't solve. |
+| 25 | **Shadow-Cutover Mode** | Dual-write proxy to both Oracle and Aurora PG for N days. Compare in real time. If parity holds, cutover is automatic. Holy grail of risk-free migration. |
+| 26 | **Auto-Generate Migration Playbook** | After validation run, generate markdown playbook: which queries need attention, which indexes to create, which stats to refresh, in what order. Hand-holdable to a junior engineer. |
+| 27 | **pg_tle / Custom Extension Parity Checker** | If Oracle uses custom PL/SQL packages, check whether PG extensions (`pg_tle`, `plv8`, `plrust`) cover the same functionality. Flag gaps SCT can't solve. |
 
 ## License
 
