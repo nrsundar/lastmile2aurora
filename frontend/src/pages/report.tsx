@@ -166,12 +166,12 @@ export default function ReportPage() {
               <SpaceBetween size="m">
                 <ColumnLayout columns={2}>
                   <div>
-                    <Box variant="h4">Original SQL</Box>
-                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#1e293b", color: "#f87171", padding: "16px", borderRadius: "8px" }}>{fixResult.original}</div>
+                    <div className="lm-code-label">Original SQL</div>
+                    <div className="lm-code lm-code--original">{fixResult.original}</div>
                   </div>
                   <div>
-                    <Box variant="h4">Rewritten SQL (AI Fix)</Box>
-                    <div style={{ fontFamily: "monospace", fontSize: "13px", whiteSpace: "pre-wrap", background: "#0f2e1a", color: "#4ade80", padding: "16px", borderRadius: "8px" }}>{fixResult.rewritten}</div>
+                    <div className="lm-code-label"><span className="lm-dot lm-dot--ok" />Rewritten SQL — AI Fix</div>
+                    <div className="lm-code lm-code--rewritten">{fixResult.rewritten}</div>
                   </div>
                 </ColumnLayout>
                 {fixResult.rationale && <Box><b>Rationale:</b> {fixResult.rationale}</Box>}
@@ -186,9 +186,10 @@ export default function ReportPage() {
           <Container header={<Header variant="h2" counter={`(${fixResult.batch.length})`} actions={<Button onClick={() => setFixResult(null)} iconName="close">Dismiss</Button>}>Batch AI Fix Results</Header>}>
             <SpaceBetween size="m">
               {fixResult.batch.map((fix: any, i: number) => (
-                <div key={i} style={{ background: fix.error ? "#1e293b" : "#0f2e1a", borderRadius: "8px", padding: "12px 16px", borderLeft: fix.error ? "4px solid #f87171" : "4px solid #4ade80" }}>
-                  <Box variant="h4" color={fix.error ? "text-status-error" : "text-status-success"}>{fix.error ? "❌" : "✅"} {fix.queryName}...</Box>
+                <div key={i} className={`lm-fix-row ${fix.error ? "lm-fix-row--err" : "lm-fix-row--ok"}`}>
+                  <div className={`lm-fix-title ${fix.error ? "lm-fix-title--err" : ""}`}>{fix.queryName}...</div>
                   {!fix.error && <Box color="text-body-secondary" fontSize="body-s">{fix.rationale?.slice(0, 150)}</Box>}
+                  {fix.error && <Box color="text-status-error" fontSize="body-s">{fix.error}</Box>}
                 </div>
               ))}
             </SpaceBetween>
@@ -209,7 +210,8 @@ export default function ReportPage() {
                   { id: "delta", header: "Delta", cell: (q) => {
                     if (q.delta_pct == null) return "—";
                     const d = q.delta_pct;
-                    return <span style={{ color: d > 20 ? "#d32f2f" : d < -10 ? "#2e7d32" : "#666", fontWeight: Math.abs(d) > 20 ? "bold" : "normal" }}>{d > 0 ? "+" : ""}{d.toFixed(1)}%</span>;
+                    const cls = d > 20 ? "lm-delta lm-delta--up" : d < -10 ? "lm-delta lm-delta--down" : "lm-delta lm-delta--flat";
+                    return <span className={cls}>{d > 0 ? "+" : ""}{d.toFixed(1)}%</span>;
                   }},
                   { id: "status", header: "Status", cell: (q) =>
                     q.alert_level === "critical" ? <StatusIndicator type="error">Critical</StatusIndicator> :
@@ -219,7 +221,7 @@ export default function ReportPage() {
                   { id: "action", header: "Action", cell: (q) =>
                     (q.alert_level === "critical" || q.alert_level === "warn") ? (
                       <Button variant="inline-link" loading={fixingQuery === q.query_hash} onClick={() => handleAIFix(q)} iconName="gen-ai">AI Fix</Button>
-                    ) : <span style={{ color: "#4ade80" }}>—</span>
+                    ) : <span style={{ color: "var(--lm-ink-300)" }}>—</span>
                   },
                 ]}
                 items={queries}
