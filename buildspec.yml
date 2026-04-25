@@ -1,0 +1,52 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: us-east-1
+    AWS_ACCOUNT_ID: "925712757492"
+    ECR_REPO: rgs-lastmile-v1
+    VITE_COGNITO_USER_POOL_ID: us-east-1_TwSUGZ9Ar
+    VITE_COGNITO_CLIENT_ID: 166an03mbe42p7pcoiov6fh6a3
+    VITE_API_URL: https://d34mk9xz6qdqt7.cloudfront.net
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+      python: 3.11
+    commands:
+      - echo "--- Installing frontend deps ---"
+      - cd frontend && npm ci --prefer-offline --no-audit --no-fund
+      - cd ..
+
+  pre_build:
+    commands:
+      - echo "--- ECR login ---"
+      - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+      - IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+      - IMAGE_TAG="${CODEBUILD_RESOLVED_SOURCE_VERSION:-manual}-$(date +%Y%m%d-%H%M%S)"
+      - echo "Image will be $IMAGE_URI:$IMAGE_TAG and :latest"
+
+  build:
+    commands:
+      - echo "--- Building frontend (vite) ---"
+      - cd frontend && npx vite build && cd ..
+      - echo "--- Building Docker image ---"
+      - docker build -t "$ECR_REPO:$IMAGE_TAG" .
+      - docker tag "$ECR_REPO:$IMAGE_TAG" "$IMAGE_URI:$IMAGE_TAG"
+      - docker tag "$ECR_REPO:$IMAGE_TAG" "$IMAGE_URI:latest"
+
+  post_build:
+    commands:
+      - echo "--- Pushing to ECR ---"
+      - docker push "$IMAGE_URI:$IMAGE_TAG"
+      - docker push "$IMAGE_URI:latest"
+      - echo "IMAGE_TAG=$IMAGE_TAG" > image.txt
+      - echo "IMAGE_URI=$IMAGE_URI" >> image.txt
+      - cat image.txt
+
+artifacts:
+  files:
+    - image.txt
+    - frontend/dist/**/*
+  name: build-output

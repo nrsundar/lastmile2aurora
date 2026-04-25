@@ -19,4 +19,9 @@ export const api = {
   queries: (runId?: string) => request(`/api/queries${runId ? `?run_id=${runId}` : ""}`),
   alerts: (runId?: string) => request(`/api/alerts${runId ? `?run_id=${runId}` : ""}`),
   remediations: (runId?: string) => request(`/api/remediations${runId ? `?run_id=${runId}` : ""}`),
+  verifyFix: (args: { query_hash: string; original_sql: string; rewritten_sql: string; run_id?: string }) =>
+    request("/api/verify-fix", { method: "POST", body: JSON.stringify(args) }),
+  verifyFixVerdict: (verificationId: number, action: "accept" | "reject") =>
+    request(`/api/verify-fix/${verificationId}/verdict`, { method: "POST", body: JSON.stringify({ action }) }),
+  verifications: (runId?: string) => request(`/api/verifications${runId ? `?run_id=${runId}` : ""}`),
 };
