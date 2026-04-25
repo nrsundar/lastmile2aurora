@@ -30,7 +30,7 @@ phases:
   build:
     commands:
       - echo "--- Building frontend (vite) ---"
-      - export LM_BUILD_ID="${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}"
+      - export LM_BUILD_ID="$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION:-dev} | cut -c1-7)"
       - export LM_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       - echo "LM_BUILD_ID=$LM_BUILD_ID  LM_BUILD_TIME=$LM_BUILD_TIME"
       - cd frontend && npx vite build && cd ..
