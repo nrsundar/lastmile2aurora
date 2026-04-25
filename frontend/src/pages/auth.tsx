@@ -71,7 +71,7 @@ export default function AuthPage() {
 
         {/* Feature cards */}
         <ColumnLayout columns={3}>
-          <div style={{ background: "linear-gradient(180deg, #f0f9ff 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #d1e5f0" }}>
+          <div style={{ background: "var(--lm-paper)", borderRadius: "12px", padding: "24px", border: "1px solid var(--lm-border)", borderLeft: "3px solid var(--lm-navy)" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #0972d3, #44b9d6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="search" variant="inverted" size="medium" />
@@ -80,7 +80,7 @@ export default function AuthPage() {
               <Box color="text-body-secondary">Tag your business-critical queries with SQL comments (<code>/* tag:order_lookup */</code>). This tool tracks only tagged queries across both databases, matching them by tag — not by SQL hash.</Box>
             </SpaceBetween>
           </div>
-          <div style={{ background: "linear-gradient(180deg, #fff8f0 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #f0d9b5" }}>
+          <div style={{ background: "var(--lm-paper)", borderRadius: "12px", padding: "24px", border: "1px solid var(--lm-border)", borderLeft: "3px solid var(--lm-ochre)" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #d97706, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="status-warning" variant="inverted" size="medium" />
@@ -89,7 +89,7 @@ export default function AuthPage() {
               <Box color="text-body-secondary">Side-by-side comparison: execution time, Oracle data blocks read vs PostgreSQL pages read, row counts, and data correctness. Detects regressions and data volume mismatches.</Box>
             </SpaceBetween>
           </div>
-          <div style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #fff 100%)", borderRadius: "12px", padding: "24px", border: "1px solid #bbf7d0" }}>
+          <div style={{ background: "var(--lm-paper)", borderRadius: "12px", padding: "24px", border: "1px solid var(--lm-border)", borderLeft: "3px solid var(--lm-forest)" }}>
             <SpaceBetween size="s">
               <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "linear-gradient(135deg, #16a34a, #4ade80)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="gen-ai" variant="inverted" size="medium" />
@@ -111,9 +111,9 @@ export default function AuthPage() {
             <ColumnLayout columns={2}>
               <SpaceBetween size="m">
                 <Box variant="h4">Step-by-Step</Box>
-                <div style={{ fontFamily: "monospace", fontSize: "13px", background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0", lineHeight: "2.2" }}>
+                <div style={{ fontFamily: "monospace", fontSize: "13px", background: "var(--lm-paper)", color: "var(--lm-ink-700)", padding: "16px", borderRadius: "8px", border: "1px solid var(--lm-border)", lineHeight: "2.2" }}>
                   <b>1.</b> <b>Tag your queries</b> — Add SQL comments to your top business-critical queries:<br/>
-                  <code style={{ background: "#e2e8f0", padding: "2px 6px", borderRadius: "4px" }}>SELECT /* tag:order_lookup */ * FROM orders WHERE...</code><br/>
+                  <code style={{ background: "var(--lm-ink-100)", color: "var(--lm-navy-bright)", padding: "2px 6px", borderRadius: "4px" }}>SELECT /* tag:order_lookup */ * FROM orders WHERE...</code><br/>
                   <b>2.</b> <b>Connect databases</b> — Enter your Oracle source and Aurora PG target connection strings<br/>
                   <b>3.</b> <b>Run your workload</b> — Use your existing application or load generator<br/>
                   <b>4.</b> <b>Monitor live</b> — Dashboard shows tagged queries from both databases in real-time<br/>
@@ -130,37 +130,37 @@ export default function AuthPage() {
 
               <SpaceBetween size="m">
                 <Box variant="h4">Performance Metrics Compared</Box>
-                <div style={{ fontSize: "13px", background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ fontSize: "13px", background: "var(--lm-paper)", color: "var(--lm-ink-700)", padding: "16px", borderRadius: "8px", border: "1px solid var(--lm-border)" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead><tr style={{ borderBottom: "2px solid #e2e8f0" }}>
+                    <thead><tr style={{ borderBottom: "2px solid var(--lm-border-strong)" }}>
                       <th style={{ textAlign: "left", padding: "6px 8px" }}>Metric</th>
                       <th style={{ textAlign: "left", padding: "6px 8px" }}>Oracle</th>
                       <th style={{ textAlign: "left", padding: "6px 8px" }}>Aurora PG</th>
                     </tr></thead>
                     <tbody>
-                      <tr style={{ borderBottom: "1px solid #f1f5f9" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>I/O</td><td style={{ padding: "6px 8px" }}>Data Blocks Read</td><td style={{ padding: "6px 8px" }}>shared_blks_read (Pages)</td></tr>
-                      <tr style={{ borderBottom: "1px solid #f1f5f9" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Execution Time</td><td style={{ padding: "6px 8px" }}>V$SQL elapsed_time</td><td style={{ padding: "6px 8px" }}>pg_stat total_exec_time</td></tr>
-                      <tr style={{ borderBottom: "1px solid #f1f5f9" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Rows</td><td style={{ padding: "6px 8px" }}>rows_processed</td><td style={{ padding: "6px 8px" }}>rows returned</td></tr>
-                      <tr style={{ borderBottom: "1px solid #f1f5f9" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Executions</td><td style={{ padding: "6px 8px" }}>executions</td><td style={{ padding: "6px 8px" }}>calls</td></tr>
-                      <tr><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Data Volume</td><td style={{ padding: "6px 8px" }} colSpan={2}>⚠️ Mismatch = likely different test data, not a real regression</td></tr>
+                      <tr style={{ borderBottom: "1px solid var(--lm-rule)" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>I/O</td><td style={{ padding: "6px 8px" }}>Data Blocks Read</td><td style={{ padding: "6px 8px" }}>shared_blks_read (Pages)</td></tr>
+                      <tr style={{ borderBottom: "1px solid var(--lm-rule)" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Execution Time</td><td style={{ padding: "6px 8px" }}>V$SQL elapsed_time</td><td style={{ padding: "6px 8px" }}>pg_stat total_exec_time</td></tr>
+                      <tr style={{ borderBottom: "1px solid var(--lm-rule)" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Rows</td><td style={{ padding: "6px 8px" }}>rows_processed</td><td style={{ padding: "6px 8px" }}>rows returned</td></tr>
+                      <tr style={{ borderBottom: "1px solid var(--lm-rule)" }}><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Executions</td><td style={{ padding: "6px 8px" }}>executions</td><td style={{ padding: "6px 8px" }}>calls</td></tr>
+                      <tr><td style={{ padding: "6px 8px", fontWeight: "bold" }}>Data Volume</td><td style={{ padding: "6px 8px" }} colSpan={2}>Mismatch = likely different test data, not a real regression</td></tr>
                     </tbody>
                   </table>
                 </div>
 
                 <Box variant="h4">Demo Mode</Box>
-                <div style={{ fontSize: "13px", background: "#fefce8", padding: "16px", borderRadius: "8px", border: "1px solid #fde047" }}>
+                <div style={{ fontSize: "13px", background: "var(--lm-paper)", color: "var(--lm-ink-700)", padding: "16px", borderRadius: "8px", border: "1px solid var(--lm-border)", borderLeft: "3px solid var(--lm-ochre)" }}>
                   <b>This demo</b> uses preconfigured Oracle EE 19c and Aurora PG 16 databases with HammerDB TPC-C workload. In production, you connect your own databases and use your real application workload.
                   <br/><br/>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead><tr style={{ borderBottom: "2px solid #fde047" }}>
+                    <thead><tr style={{ borderBottom: "2px solid var(--lm-ochre)" }}>
                       <th style={{ textAlign: "left", padding: "4px 8px" }}>Profile</th>
                       <th style={{ textAlign: "left", padding: "4px 8px" }}>Duration</th>
                       <th style={{ textAlign: "left", padding: "4px 8px" }}>Load</th>
                     </tr></thead>
                     <tbody>
-                      <tr><td style={{ padding: "4px 8px" }}>🟢 Small</td><td style={{ padding: "4px 8px" }}>6 min</td><td style={{ padding: "4px 8px" }}>2 virtual users</td></tr>
-                      <tr><td style={{ padding: "4px 8px" }}>🟡 Medium</td><td style={{ padding: "4px 8px" }}>30 min</td><td style={{ padding: "4px 8px" }}>4 virtual users</td></tr>
-                      <tr><td style={{ padding: "4px 8px" }}>🔴 Large</td><td style={{ padding: "4px 8px" }}>60 min</td><td style={{ padding: "4px 8px" }}>8 virtual users</td></tr>
+                      <tr><td style={{ padding: "4px 8px", color: "var(--lm-forest-bright)", fontWeight: 600 }}>Small</td><td style={{ padding: "4px 8px" }}>6 min</td><td style={{ padding: "4px 8px" }}>2 virtual users</td></tr>
+                      <tr><td style={{ padding: "4px 8px", color: "var(--lm-ochre-bright)", fontWeight: 600 }}>Medium</td><td style={{ padding: "4px 8px" }}>30 min</td><td style={{ padding: "4px 8px" }}>4 virtual users</td></tr>
+                      <tr><td style={{ padding: "4px 8px", color: "var(--lm-clay-bright)", fontWeight: 600 }}>Large</td><td style={{ padding: "4px 8px" }}>60 min</td><td style={{ padding: "4px 8px" }}>8 virtual users</td></tr>
                     </tbody>
                   </table>
                 </div>
