@@ -38,10 +38,8 @@ class OracleExecutor:
 
         conn = self._get_conn()
         cur = conn.cursor()
+        start = None
         try:
-            # Capture session stats before execution
-            stats_before = self._get_session_stats(conn)
-
             start = time.monotonic()
             cur.execute(sql)
             if cur.description:
@@ -51,16 +49,13 @@ class OracleExecutor:
                 columns, rows = [], []
             wall_ms = (time.monotonic() - start) * 1000
 
-            # Capture session stats after execution
-            stats_after = self._get_session_stats(conn)
+            # CRITICAL: capture V$SQL stats IMMEDIATELY, before any other query runs.
+            # prev_sql_id in V$SESSION is updated after every statement, so the very next
+            # query in this session would overwrite it. Pull elapsed_time + disk_reads +
+            # buffer_gets + rows_processed in one shot tied to our sql_id.
+            engine_stats = self._get_engine_stats(conn)
 
-            # Calculate deltas
-            blocks_read = (stats_after.get("physical reads", 0) - stats_before.get("physical reads", 0))
-            buffer_gets = (stats_after.get("session logical reads", 0) - stats_before.get("session logical reads", 0))
-            rows_processed = len(rows)
-
-            # Engine-only time from V$SQL.elapsed_time (microseconds) for fair comparison with PG's Execution Time
-            engine_ms = self._get_engine_elapsed_ms(conn, sql)
+            engine_ms = engine_stats.get("elapsed_ms")
             reported_ms = engine_ms if engine_ms is not None else wall_ms
 
             return {
@@ -70,57 +65,51 @@ class OracleExecutor:
                 "execution_time_ms": round(reported_ms, 2),
                 "source": "oracle_rds",
                 "stats": {
-                    "disk_reads": blocks_read,
-                    "buffer_gets": buffer_gets,
-                    "rows_processed": rows_processed,
+                    "disk_reads": engine_stats.get("disk_reads", 0),
+                    "buffer_gets": engine_stats.get("buffer_gets", 0),
+                    "rows_processed": engine_stats.get("rows_processed", len(rows)),
                     "wall_ms": round(wall_ms, 2),
                     "engine_ms": round(engine_ms, 2) if engine_ms is not None else None,
                 },
             }
         except Exception as e:
-            elapsed = (time.monotonic() - start) if 'start' in dir() else 0
+            elapsed = (time.monotonic() - start) if start is not None else 0
             return {
                 "columns": [], "rows": [], "row_count": 0,
-                "execution_time_ms": round(elapsed * 1000 if elapsed else 0, 2),
+                "execution_time_ms": round(elapsed * 1000, 2),
                 "source": "oracle_rds", "error": str(e),
                 "stats": {"disk_reads": 0, "buffer_gets": 0, "rows_processed": 0},
             }
         finally:
             cur.close()
 
-    def _get_engine_elapsed_ms(self, conn, sql: str):
-        """Read V$SQL.elapsed_time (microseconds) for the most recent execution of this SQL in our session.
-        Returns engine-internal time in ms (no network), or None on failure."""
+    def _get_engine_stats(self, conn) -> dict:
+        """Pull elapsed_time (µs), disk_reads, buffer_gets, rows_processed from V$SQL for the
+        statement we just ran. Must be called IMMEDIATELY after the user query — any other SQL
+        would advance V$SESSION.prev_sql_id and make us read the wrong row.
+        Returns {} on failure."""
         try:
             cur = conn.cursor()
             cur.execute("""
-                SELECT elapsed_time
-                FROM V$SQL s
-                WHERE s.sql_id = (
-                    SELECT prev_sql_id FROM V$SESSION WHERE sid = SYS_CONTEXT('USERENV', 'SID')
+                SELECT elapsed_time, disk_reads, buffer_gets, rows_processed
+                FROM V$SQL
+                WHERE sql_id = (
+                    SELECT prev_sql_id FROM V$SESSION
+                    WHERE sid = SYS_CONTEXT('USERENV', 'SID')
                 )
                 AND ROWNUM = 1
             """)
             row = cur.fetchone()
             cur.close()
-            if row and row[0] is not None:
-                return float(row[0]) / 1000.0  # microseconds → ms
-        except Exception:
-            pass
-        return None
-
-    def _get_session_stats(self, conn) -> dict:
-        """Read V$MYSTAT + V$STATNAME for current session I/O stats."""
-        try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT sn.name, ms.value
-                FROM V$MYSTAT ms JOIN V$STATNAME sn ON ms.statistic# = sn.statistic#
-                WHERE sn.name IN ('physical reads', 'session logical reads')
-            """)
-            stats = {row[0]: row[1] for row in cur.fetchall()}
-            cur.close()
-            return stats
+            if row is None:
+                return {}
+            elapsed_us, disk_reads, buffer_gets, rows_processed = row
+            return {
+                "elapsed_ms": (float(elapsed_us) / 1000.0) if elapsed_us is not None else None,
+                "disk_reads": int(disk_reads) if disk_reads is not None else 0,
+                "buffer_gets": int(buffer_gets) if buffer_gets is not None else 0,
+                "rows_processed": int(rows_processed) if rows_processed is not None else 0,
+            }
         except Exception:
             return {}
 
