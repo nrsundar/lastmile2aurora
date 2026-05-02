@@ -265,7 +265,7 @@ aws cognito-idp admin-add-user-to-group --user-pool-id <pool-id> \
   --username admin@example.com --group-name admin
 ```
 
-## Security & Compliance (Epoxy/Orthanc)
+## Security & Compliance 
 
 | Control | Status | Implementation |
 |---------|--------|---------------|
