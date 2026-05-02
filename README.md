@@ -41,13 +41,13 @@ LastMile2Aurora is a **real-time performance watchdog** that sits between your O
    └──────┬─────────┘
           ▼
 ┌─────────────────────┐
-│ LastMile2Aurora      │
-│ ECS Fargate          │
-│ • Tag Matcher        │
-│ • Deep Diff          │
-│ • Perf Compare       │  ──→  CloudFront (HTTPS)  ──→  Dashboard
-│ • LLM Rewrite        │
-│ • Alert Engine       │
+│ LastMile2Aurora     │
+│ ECS Fargate         │
+│ • Tag Matcher       │
+│ • Deep Diff         │
+│ • Perf Compare      │  ──→  CloudFront (HTTPS)  ──→  Dashboard
+│ • LLM Rewrite       │
+│ • Alert Engine      │
 └─────────────────────┘
 ```
 
@@ -55,7 +55,6 @@ LastMile2Aurora is a **real-time performance watchdog** that sits between your O
 
 **URL:** https://<YOUR_AMPLIFY_URL>
 
-**Login:** Contact raghasun@ for credentials
 
 ### Demo Flow (2 minutes)
 
