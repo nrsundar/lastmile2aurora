@@ -53,7 +53,7 @@ LastMile2Aurora is a **real-time performance watchdog** that sits between your O
 
 ## Live Demo
 
-**URL:** https://main.ddlli4hw6ltbn.amplifyapp.com
+**URL:** https://<YOUR_AMPLIFY_URL>
 
 **Login:** Contact raghasun@ for credentials
 
@@ -136,7 +136,7 @@ A common false positive: customers test with a subset of production data, then c
 | **Source DB** | Oracle EE 19c on RDS (private subnet, encrypted) |
 | **Target DB** | Aurora PostgreSQL 16 (private subnet, KMS CMK) |
 | **AI** | Amazon Bedrock (Claude) for query rewriting |
-| **SQL Engine** | [sql-migration-optimizer](https://gitlab.aws.dev/raghasun/sql-migration-optimizer) |
+| **SQL Engine** | [sql-migration-optimizer](https://github.com/<YOUR_GITHUB_USER>/sql-migration-optimizer) |
 | **Load Generator** | HammerDB 4.x (TPC-C) on EC2 |
 | **Hosting** | ECS Fargate + ALB + CloudFront (HTTPS) + Amplify |
 | **IaC** | CloudFormation |
@@ -175,7 +175,7 @@ lastmile2aurora/
 │   ├── demo_queries.json           # 16 tagged Oracle queries with PG translations
 │   ├── seed.py                     # Seed both databases
 │   └── traffic_generator.py        # Continuous load generator
-├── sql-migration-optimizer/        # SQL conversion engine (from gitlab.aws.dev/raghasun/)
+├── sql-migration-optimizer/        # SQL conversion engine (from github.com/<YOUR_GITHUB_USER>/)
 ├── workshop/                       # Deployment logs for Workshop Studio
 ├── Dockerfile                      # Backend + frontend container
 └── README.md                       # This file
@@ -298,15 +298,15 @@ Multiple users can run workloads simultaneously. Each execution gets a unique `r
 aws cloudformation delete-stack --stack-name rgs-lastmile-hammerdb-v1
 aws rds delete-db-instance --db-instance-identifier rgs-lastmile-oracle-ee-v1 --skip-final-snapshot
 aws cloudformation delete-stack --stack-name rgs-lastmile-v1
-aws amplify delete-app --app-id ddlli4hw6ltbn
-aws cloudfront delete-distribution --id EN5DGHAHCX85H --if-match <etag>
+aws amplify delete-app --app-id <AMPLIFY_APP_ID>
+aws cloudfront delete-distribution --id <CLOUDFRONT_DIST_ID> --if-match <etag>
 ```
 
 ## Related Projects
 
-- [sql-migration-optimizer](https://gitlab.aws.dev/raghasun/sql-migration-optimizer) — Core SQL conversion engine
-- [mcp-sql-optimizer](https://gitlab.aws.dev/raghasun/mcp-sql-optimizer) — MCP server for AI-assisted SQL optimization
-- [cloud-demo-generator-v2](https://gitlab.aws.dev/raghasun/cloud-demo-generator-v2) — Cognito auth pattern reference
+- [sql-migration-optimizer](https://github.com/<YOUR_GITHUB_USER>/sql-migration-optimizer) — Core SQL conversion engine
+- [mcp-sql-optimizer](https://github.com/<YOUR_GITHUB_USER>/mcp-sql-optimizer) — MCP server for AI-assisted SQL optimization
+- [cloud-demo-generator-v2](https://github.com/<YOUR_GITHUB_USER>/cloud-demo-generator-v2) — Cognito auth pattern reference
 
 ## Future Enhancements
 

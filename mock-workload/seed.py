@@ -129,7 +129,7 @@ if __name__ == "__main__":
             port=int(os.environ.get("ORACLE_PORT", "1521")),
             service=os.environ.get("ORACLE_SERVICE", "LASTMILE"),
             user=os.environ.get("ORACLE_USER", "oracleadmin"),
-            password=os.environ.get("ORACLE_PASSWORD", "LastMile2Aurora2026"),
+            password=os.environ.get("ORACLE_PASSWORD", "<YOUR_PASSWORD>"),
         )
 
     if action in ("pg", "both"):
@@ -138,5 +138,5 @@ if __name__ == "__main__":
             port=int(os.environ.get("PG_PORT", "5432")),
             database=os.environ.get("PG_DATABASE", "lastmile"),
             user=os.environ.get("PG_USER", "lastmileadmin"),
-            password=os.environ.get("PG_PASSWORD", "LastMile2Aurora2026"),
+            password=os.environ.get("PG_PASSWORD", "<YOUR_PASSWORD>"),
         )

@@ -8,14 +8,14 @@ class Settings(BaseSettings):
     pg_host: str = "localhost"
     pg_port: int = 5432
     pg_database: str = "lastmile"
-    pg_user: str = "lastmileadmin"
+    pg_user: str = ""
     pg_password: str = ""
 
     # Oracle (source)
     oracle_host: str = ""
     oracle_port: int = 1521
     oracle_service: str = "LASTMILE"
-    oracle_user: str = "oracleadmin"
+    oracle_user: str = ""
     oracle_password: str = ""
 
     # AWS

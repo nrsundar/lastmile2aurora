@@ -147,12 +147,12 @@ if __name__ == "__main__":
     p.add_argument("--oracle-port", type=int, default=int(os.environ.get("ORACLE_PORT", "1521")))
     p.add_argument("--oracle-service", default=os.environ.get("ORACLE_SERVICE", "LASTMILE"))
     p.add_argument("--oracle-user", default=os.environ.get("ORACLE_USER", "oracleadmin"))
-    p.add_argument("--oracle-password", default=os.environ.get("ORACLE_PASSWORD", "LastMile2Aurora2026"))
+    p.add_argument("--oracle-password", default=os.environ.get("ORACLE_PASSWORD", "<YOUR_PASSWORD>"))
     # Aurora PG
     p.add_argument("--pg-host", default=os.environ.get("PG_HOST", ""))
     p.add_argument("--pg-port", type=int, default=int(os.environ.get("PG_PORT", "5432")))
     p.add_argument("--pg-database", default=os.environ.get("PG_DATABASE", "lastmile"))
     p.add_argument("--pg-user", default=os.environ.get("PG_USER", "lastmileadmin"))
-    p.add_argument("--pg-password", default=os.environ.get("PG_PASSWORD", "LastMile2Aurora2026"))
+    p.add_argument("--pg-password", default=os.environ.get("PG_PASSWORD", "<YOUR_PASSWORD>"))
 
     run(p.parse_args())

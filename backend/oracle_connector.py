@@ -11,7 +11,7 @@ except ImportError:
 
 
 class OracleExecutor:
-    def __init__(self, host=None, port=1521, service="LASTMILE", user="oracleadmin", password=""):
+    def __init__(self, host=None, port=1521, service="", user="", password=""):
         self.host = host or os.environ.get("ORACLE_HOST", "")
         self.port = port
         self.service = service

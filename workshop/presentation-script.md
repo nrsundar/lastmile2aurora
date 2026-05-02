@@ -79,7 +79,7 @@ FROM orders o LIMIT 100
 
 ## Slide 6: Live Demo — Landing Page (30 sec)
 
-**Open https://main.ddlli4hw6ltbn.amplifyapp.com**
+**Open https://<YOUR_AMPLIFY_URL>**
 
 - Show the landing page: tagline, feature cards, architecture diagram
 - Show "How It Works" section with tagging workflow
@@ -232,9 +232,9 @@ Quick scroll through the quirks table:
 
 ## Slide 16: Q&A
 
-**Try it yourself:** https://main.ddlli4hw6ltbn.amplifyapp.com
+**Try it yourself:** https://<YOUR_AMPLIFY_URL>
 
-**Code:** https://gitlab.aws.dev/raghasun/lastmile2aurora
+**Code:** https://github.com/<YOUR_GITHUB_USER>/lastmile2aurora
 
 **Questions?**
 

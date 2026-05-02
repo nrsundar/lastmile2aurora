@@ -3,11 +3,11 @@ version: 0.2
 env:
   variables:
     AWS_REGION: us-east-1
-    AWS_ACCOUNT_ID: "925712757492"
+    AWS_ACCOUNT_ID: "<AWS_ACCOUNT_ID>"
     ECR_REPO: rgs-lastmile-v1
-    VITE_COGNITO_USER_POOL_ID: us-east-1_TwSUGZ9Ar
-    VITE_COGNITO_CLIENT_ID: 166an03mbe42p7pcoiov6fh6a3
-    VITE_API_URL: https://d34mk9xz6qdqt7.cloudfront.net
+    VITE_COGNITO_USER_POOL_ID: <COGNITO_POOL_ID>
+    VITE_COGNITO_CLIENT_ID: <COGNITO_CLIENT_ID>
+    VITE_API_URL: https://<YOUR_CLOUDFRONT_DOMAIN>
 
 phases:
   install:

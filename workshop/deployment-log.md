@@ -5,8 +5,8 @@ Date: Wed Apr 22 17:42:30 UTC 2026
 ```
 {
     "UserId": "AROA5PCGHWL2BUXGZTIRS:raghasun-Isengard",
-    "Account": "925712757492",
-    "Arn": "arn:aws:sts::925712757492:assumed-role/SA-Admin-Role/raghasun-Isengard"
+    "Account": "<AWS_ACCOUNT_ID>",
+    "Arn": "arn:aws:sts::<AWS_ACCOUNT_ID>:assumed-role/SA-Admin-Role/raghasun-Isengard"
 }
 ```
 
@@ -60,12 +60,12 @@ Date: Wed Apr 22 17:42:30 UTC 2026
 
 ## Resource Endpoints
 ```
-Cognito User Pool: us-east-1_TwSUGZ9Ar
-Cognito Client ID: 166an03mbe42p7pcoiov6fh6a3
+Cognito User Pool: <COGNITO_POOL_ID>
+Cognito Client ID: <COGNITO_CLIENT_ID>
 Aurora PG Endpoint: rgs-lastmile-aurora-v1.cluster-csnme3bsej9t.us-east-1.rds.amazonaws.com
 ALB DNS: rgs-lastmile-alb-v1-1831853084.us-east-1.elb.amazonaws.com
-ECR: 925712757492.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1
-S3: rgs-lastmile-data-925712757492-v1
+ECR: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1
+S3: rgs-lastmile-data-<AWS_ACCOUNT_ID>-v1
 ```
 
 ## Frontend Build
@@ -147,10 +147,10 @@ TEST 2: Mismatched results (PG slower + missing rows) → FAILED
 ```
 +-------------------+----------------------------------------------------------------------------+
 |  APIURL           |  http://rgs-lastmile-alb-v1-1831853084.us-east-1.elb.amazonaws.com         |
-|  CognitoUserPoolId|  us-east-1_TwSUGZ9Ar                                                       |
-|  CognitoClientId  |  166an03mbe42p7pcoiov6fh6a3                                                |
-|  S3Bucket         |  rgs-lastmile-data-925712757492-v1                                         |
-|  ECRRepository    |  925712757492.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1              |
+|  CognitoUserPoolId|  <COGNITO_POOL_ID>                                                       |
+|  CognitoClientId  |  <COGNITO_CLIENT_ID>                                                |
+|  S3Bucket         |  rgs-lastmile-data-<AWS_ACCOUNT_ID>-v1                                         |
+|  ECRRepository    |  <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1              |
 |  AuroraEndpoint   |  rgs-lastmile-aurora-v1.cluster-csnme3bsej9t.us-east-1.rds.amazonaws.com   |
 |  StackVersion     |  v1                                                                        |
 +-------------------+----------------------------------------------------------------------------+
@@ -166,29 +166,29 @@ Deployment state: COMPLETED
 
 ## Docker Image — Pushed to ECR ✅
 ```
-925712757492.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1:latest
+<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/rgs-lastmile-v1:latest
 Digest: sha256:84be7da8a9ea0aab67c55dfd19899f034c4dd3bc07bb8ace289d775366e30633
 ```
 
 ## Amplify Frontend — Deployed ✅
 ```
-App ID: ddlli4hw6ltbn
-URL: https://main.ddlli4hw6ltbn.amplifyapp.com
+App ID: <AMPLIFY_APP_ID>
+URL: https://<YOUR_AMPLIFY_URL>
 Status: SUCCEED
 ```
 
 ## Cognito Admin User — Created ✅
 ```
-Email: admin@lastmile2aurora.demo
-Password: LastMile2Aurora2026!
+Email: <ADMIN_EMAIL>
+Password: <ADMIN_PASSWORD>
 Group: admin
-Pool: us-east-1_TwSUGZ9Ar
+Pool: <COGNITO_POOL_ID>
 ```
 
 ## All Endpoints
 | Component | URL |
 |-----------|-----|
-| Frontend (Amplify) | https://main.ddlli4hw6ltbn.amplifyapp.com |
+| Frontend (Amplify) | https://<YOUR_AMPLIFY_URL> |
 | Backend API (ALB) | http://rgs-lastmile-alb-v1-1831853084.us-east-1.elb.amazonaws.com |
 | Aurora PG (private) | rgs-lastmile-aurora-v1.cluster-csnme3bsej9t.us-east-1.rds.amazonaws.com:5432 |
 
