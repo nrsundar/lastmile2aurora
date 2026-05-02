@@ -27,12 +27,12 @@ LastMile2Aurora is a **real-time performance watchdog** that sits between your O
 ![Architecture](frontend/public/architecture.svg)
 
 ```
-┌──────────────────┐
-│ Customer App     │  Tagged SQL queries: /* tag:order_lookup */
-│ or HammerDB      │
-└──┬───────────┬───┘
-   │           │
-   ▼           ▼
+   ┌──────────────────┐
+   │ Customer App     │  Tagged SQL queries: /* tag:order_lookup */
+   │ or HammerDB      │
+   └──┬───────────┬───┘
+      │           │
+      ▼           ▼
 ┌──────────┐ ┌──────────────┐
 │ Oracle   │ │ Aurora PG 16 │
 │ EE 19c   │ │ (target)     │
@@ -40,15 +40,15 @@ LastMile2Aurora is a **real-time performance watchdog** that sits between your O
    │                │
    └──────┬─────────┘
           ▼
-┌─────────────────────┐
-│ LastMile2Aurora     │
-│ ECS Fargate         │
-│ • Tag Matcher       │
-│ • Deep Diff         │
-│ • Perf Compare      │  ──→  CloudFront (HTTPS)  ──→  Dashboard
-│ • LLM Rewrite       │
-│ • Alert Engine      │
-└─────────────────────┘
+   ┌─────────────────────┐
+   │ LastMile2Aurora     │
+   │ ECS Fargate         │
+   │ • Tag Matcher       │
+   │ • Deep Diff         │
+   │ • Perf Compare      │  ──→  CloudFront (HTTPS)  ──→  Dashboard
+   │ • LLM Rewrite       │
+   │ • Alert Engine      │
+   └─────────────────────┘
 ```
 
 ## Live Demo
